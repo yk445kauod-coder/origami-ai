@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: origami-db
+    environment:
+      MYSQL_ROOT_PASSWORD: origami_root_pass
+      MYSQL_DATABASE: origami_db
+      MYSQL_USER: origami_user
+      MYSQL_PASSWORD: origami_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - origami-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Ollama AI Models
+  ollama:
+    image: ollama/ollama:latest
+    container_name: origami-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - origami-network
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      timeout: 20s
+      retries: 10
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: origami-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mysql://origami_user:origami_pass@db:3306/origami_db
+      - OLLAMA_URL=http://ollama:11434
+      - JWT_SECRET=origami_jwt_secret_key_change_in_production
+      - VITE_APP_ID=origami
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - origami-network
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run dev
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: origami-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - origami-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  mysql_data:
+  ollama_data:
+  redis_data:
+
+networks:
+  origami-network:
+    driver: bridge
