@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, projects, dataFiles, aiModels, analysisResults, conversations, chatMessages, dashboardWidgets, systemSettings } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,200 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Projects queries
+export async function getUserProjects(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(projects).where(eq(projects.userId, userId));
+}
+
+export async function createProject(userId: number, name: string, description?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(projects).values({
+    userId,
+    name,
+    description,
+  });
+
+  return result;
+}
+
+// Data files queries
+export async function getProjectDataFiles(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(dataFiles).where(eq(dataFiles.projectId, projectId));
+}
+
+export async function createDataFile(projectId: number, fileName: string, fileType: string, fileSize: number, storageKey: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(dataFiles).values({
+    projectId,
+    fileName,
+    fileType,
+    fileSize,
+    storageKey,
+  });
+}
+
+// AI Models queries
+export async function getUserAIModels(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(aiModels).where(eq(aiModels.userId, userId));
+}
+
+export async function getDefaultAIModel(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(aiModels).where(
+    and(
+      eq(aiModels.userId, userId),
+      eq(aiModels.isDefault, true),
+      eq(aiModels.isActive, true)
+    )
+  ).limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function createAIModel(userId: number, modelName: string, provider: string, modelId: string, isDefault: boolean = false) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(aiModels).values({
+    userId,
+    modelName,
+    provider,
+    modelId,
+    isDefault,
+  });
+}
+
+// Analysis results queries
+export async function getProjectAnalysisResults(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(analysisResults).where(eq(analysisResults.projectId, projectId));
+}
+
+export async function createAnalysisResult(projectId: number, dataFileId: number, modelId: number, analysisType: string, result: any, summary?: string, insights?: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(analysisResults).values({
+    projectId,
+    dataFileId,
+    modelId,
+    analysisType,
+    result,
+    summary,
+    insights,
+  });
+}
+
+// Conversations queries
+export async function getProjectConversations(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(conversations).where(eq(conversations.projectId, projectId));
+}
+
+export async function createConversation(projectId: number, userId: number, title: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(conversations).values({
+    projectId,
+    userId,
+    title,
+  });
+}
+
+// Chat messages queries
+export async function getConversationMessages(conversationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(chatMessages).where(eq(chatMessages.conversationId, conversationId));
+}
+
+export async function addChatMessage(conversationId: number, role: "user" | "assistant", content: string, modelId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(chatMessages).values({
+    conversationId,
+    role,
+    content,
+    modelId,
+  });
+}
+
+// System settings queries
+export async function getUserSettings(userId: number, settingKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(systemSettings).where(
+    and(
+      eq(systemSettings.userId, userId),
+      eq(systemSettings.settingKey, settingKey)
+    )
+  ).limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function saveUserSetting(userId: number, settingKey: string, settingValue: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await getUserSettings(userId, settingKey);
+
+  if (existing) {
+    return await db.update(systemSettings).set({ settingValue }).where(
+      and(
+        eq(systemSettings.userId, userId),
+        eq(systemSettings.settingKey, settingKey)
+      )
+    );
+  } else {
+    return await db.insert(systemSettings).values({
+      userId,
+      settingKey,
+      settingValue,
+    });
+  }
+}
+
+// Dashboard widgets queries
+export async function getProjectDashboardWidgets(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(dashboardWidgets).where(eq(dashboardWidgets.projectId, projectId));
+}
+
+export async function createDashboardWidget(projectId: number, widgetType: string, title: string, dataSource: any, configuration?: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(dashboardWidgets).values({
+    projectId,
+    widgetType,
+    title,
+    dataSource,
+    configuration,
+  });
+}

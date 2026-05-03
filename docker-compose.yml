@@ -6,10 +6,10 @@ services:
     image: mysql:8.0
     container_name: origami-db
     environment:
-      MYSQL_ROOT_PASSWORD: origami_root_pass
-      MYSQL_DATABASE: origami_db
-      MYSQL_USER: origami_user
-      MYSQL_PASSWORD: origami_pass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-origami_root_pass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-origami_db}
+      MYSQL_USER: ${MYSQL_USER:-origami_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-origami_pass}
     ports:
       - "3306:3306"
     volumes:
@@ -20,6 +20,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+    restart: unless-stopped
 
   # Ollama AI Models
   ollama:
@@ -37,6 +38,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       timeout: 20s
       retries: 10
+    restart: unless-stopped
 
   # Next.js Application
   app:
@@ -47,15 +49,19 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=mysql://origami_user:origami_pass@db:3306/origami_db
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=mysql://${MYSQL_USER:-origami_user}:${MYSQL_PASSWORD:-origami_pass}@db:3306/${MYSQL_DATABASE:-origami_db}
       - OLLAMA_URL=http://ollama:11434
-      - JWT_SECRET=origami_jwt_secret_key_change_in_production
-      - VITE_APP_ID=origami
+      - OLLAMA_DEFAULT_MODEL=${OLLAMA_DEFAULT_MODEL:-egytronic_1.0}
+      - JWT_SECRET=${JWT_SECRET:-origami_jwt_secret_key_change_in_production}
+      - VITE_APP_ID=${VITE_APP_ID:-origami}
+      - REDIS_URL=redis://redis:6379
     depends_on:
       db:
         condition: service_healthy
       ollama:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - origami-network
@@ -63,8 +69,9 @@ services:
       - ./:/app
       - /app/node_modules
     command: npm run dev
+    restart: unless-stopped
 
-  # Redis Cache (Optional)
+  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: origami-redis
@@ -78,6 +85,7 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       timeout: 20s
       retries: 10
+    restart: unless-stopped
 
 volumes:
   mysql_data:

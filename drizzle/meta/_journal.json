@@ -8,6 +8,13 @@
       "when": 1777836256227,
       "tag": "0000_real_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1777836782943,
+      "tag": "0001_simple_william_stryker",
+      "breakpoints": true
     }
   ]
 }
