@@ -24,7 +24,7 @@ class FileProcessor {
         trim: true,
       });
 
-      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      const columns = rows.length > 0 ? Object.keys(rows[0] as Record<string, unknown>) : [];
       const preview = rows.slice(0, 10);
 
       return {
@@ -50,7 +50,7 @@ class FileProcessor {
       const sheet = workbook.Sheets[sheetName];
 
       const rows = XLSX.utils.sheet_to_json(sheet);
-      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      const columns = rows.length > 0 ? Object.keys(rows[0] as Record<string, unknown>) : [];
       const preview = rows.slice(0, 10);
 
       return {
