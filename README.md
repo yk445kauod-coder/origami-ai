@@ -1,375 +1,121 @@
-# 🎨 Origami - منصة تحليل البيانات الذكية
+# Egytronic Chat - Pixel Art Discord-style Chat App
 
-منصة تحليل بيانات ذكية متقدمة **ذاتية الاستضافة** بالكامل، مصممة للشركات والفرق التي تحتاج إلى تحليل بيانات سريع وآمن محلياً. تجمع **Origami** بين قوة الذكاء الاصطناعي المحلي وأناقة التصميم لتقديم تجربة استخدام فريدة وخصوصية كاملة.
+<div align="center">
+  <img src="https://img.shields.io/badge/Company-Egytronic-blue?style=for-the-badge" alt="Egytronic">
+  <img src="https://img.shields.io/badge/Framework-React-61dafb?style=for-the-badge&logo=react" alt="React">
+  <img src="https://img.shields.io/badge/Firebase-Realtime%20Database-ffca28?style=for-the-badge&logo=firebase" alt="Firebase">
+  <img src="https://img.shields.io/badge/Style-Pixel%20Art-purple?style=for-the-badge" alt="Pixel Art">
+  <img src="https://img.shields.io/badge/Deploy-GitHub%20Pages-24292e?style=for-the-badge&logo=github" alt="GitHub Pages">
+</div>
 
-**الشعار:** "محلل بيانات ذكي يعيش داخل شركتك ويحول بياناتك إلى قرارات."
+## 🎮 Egytronic Chat
 
----
+A beautiful, modern chat application with Discord-like UI/UX and unique Pixel Art style. Built with React, TypeScript, Firebase Realtime Database, and styled with a custom pixel art theme.
 
-## 🌟 المميزات الرئيسية
+### ✨ Features
 
-### 🔒 الخصوصية الكاملة
-- **محلية بالكامل**: جميع البيانات تبقى على خادمك المحلي - لا تغادر أبداً
-- **بدون تبعيات سحابية**: لا توجد خوادم خارجية أو مراقبة أو تتبع
-- **تحكم كامل**: أنت المسؤول الوحيد عن بياناتك وأمانها
-- **عمل بدون إنترنت**: تشغيل كامل محلي بدون الحاجة للاتصال بالإنترنت
+- 🎨 **Pixel Art Theme** - Unique retro-gaming aesthetic
+- 💬 **Real-time Messaging** - Powered by Firebase Realtime Database
+- 📷 **Media Sharing** - Support for images and videos
+- 😀 **Pixel Art Emoji Pack** - 25 custom pixel art emojis in JSON format
+- 📱 **Fully Responsive** - Works on desktop and mobile devices
+- 🌐 **RTL Support** - Full Arabic language support
+- ⚡ **Fast & Lightweight** - Built with Vite for optimal performance
+- 🔄 **Edit & Delete** - Edit or delete your own messages
+- ❤️ **Reactions** - React to messages with emoji
+- 💬 **Reply** - Reply to specific messages
+- ⌨️ **Typing Indicator** - See when others are typing
 
-### ⚡ الأداء العالي
-- **معالجة فورية**: تحليل البيانات بدون تأخير أو انتظار
-- **نماذج محسّنة**: نماذج ذكاء اصطناعي محسّنة للأداء المحلي (GGUF)
-- **استهلاك منخفض للموارد**: تشغيل على أجهزة عادية (4GB RAM كافية)
-- **قابل للتوسع**: إضافة نماذج جديدة بسهولة
-
-### 🧠 الذكاء الاصطناعي المتقدم
-- **دعم Egytronic_1.0**: النموذج الافتراضي المحسّن من Egytronic Co.
-- **مرونة النماذج**: دعم أي نموذج Ollama أو GGUF
-- **تحليل ذكي**: توليد رؤى واضحة باللغة الطبيعية
-- **فهم السياق**: تحليل شامل للبيانات مع فهم العلاقات
-
-### 📊 لوحات معلومات ديناميكية
-- **تصورات بيانية تفاعلية**: رسوم بيانية خطية وأعمدة ودوائر وتوزيعات
-- **تحديث فوري**: البيانات تتحدث في الوقت الفعلي
-- **تصدير سهل**: تصدير التقارير والرسوم البيانية بصيغ متعددة
-- **لوحات مخصصة**: إنشاء لوحات معلومات حسب احتياجاتك
-
-### 🎯 سهولة الاستخدام
-- **واجهة حدسية**: تصميم عصري وسهل الاستخدام بدون تعقيد
-- **بدون تقنيات معقدة**: استيراد وتحليل بنقرة واحدة
-- **دعم متعدد اللغات**: العربية والإنجليزية
-- **توثيق شامل**: توثيق كامل وسهل الفهم
-
-### 📁 إدارة البيانات
-- **استيراد متعدد الصيغ**: CSV و Excel و JSON
-- **معاينة فورية**: رؤية البيانات قبل التحليل
-- **تنظيم المشاريع**: تنظيم البيانات في مشاريع منفصلة
-- **تخزين آمن**: تخزين آمن ومشفر للبيانات
-
-### 💬 واجهة الأسئلة والأجوبة
-- **محادثة ذكية**: اسأل أسئلة طبيعية عن بياناتك
-- **إجابات فورية**: الحصول على إجابات ذكية من الذكاء الاصطناعي
-- **السياق المحفوظ**: الحفاظ على سياق المحادثة
-- **تصدير المحادثات**: حفظ وتصدير المحادثات
-
----
-
-## 🏗️ البنية التقنية
-
-### المكونات الرئيسية
-
-```
-┌─────────────────────────────────────────────────────┐
-│           Origami - منصة تحليل البيانات            │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────────┐    ┌──────────────┐              │
-│  │  Frontend    │    │   Backend    │              │
-│  │  (Next.js)   │◄──►│  (Express)   │              │
-│  └──────────────┘    └──────────────┘              │
-│         │                    │                      │
-│         │                    ├──► Ollama (AI)      │
-│         │                    ├──► MySQL (DB)       │
-│         │                    └──► Redis (Cache)    │
-│         │                                           │
-│  ┌──────────────┐    ┌──────────────┐              │
-│  │  tRPC API    │    │  File Parser │              │
-│  │  (Type-safe) │    │  (CSV/Excel) │              │
-│  └──────────────┘    └──────────────┘              │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
-### التقنيات المستخدمة
-
-| الطبقة | التقنية | الوصف |
-|------|--------|-------|
-| **Frontend** | Next.js 14 + React 19 | واجهة مستخدم حديثة وسريعة |
-| **Styling** | Tailwind CSS 4 | تصميم متجاوب وأنيق |
-| **Charts** | Recharts | رسوم بيانية تفاعلية |
-| **Backend** | Express.js + tRPC | API آمن وموثوق |
-| **Database** | MySQL 8 | قاعدة بيانات قوية |
-| **AI Models** | Ollama + GGUF | نماذج ذكاء اصطناعي محلية |
-| **Cache** | Redis | تخزين مؤقت سريع |
-| **File Processing** | csv-parse + xlsx | معالجة الملفات |
-| **Authentication** | Manus OAuth | مصادقة آمنة |
-
----
-
-## 📋 المتطلبات
-
-### الحد الأدنى
-- **Docker و Docker Compose**: للنشر المحلي
-- **4GB RAM على الأقل**: للتشغيل السلس
-- **10GB مساحة تخزين**: لنماذج Ollama والبيانات
-- **Linux/Mac/Windows**: أي نظام تشغيل يدعم Docker
-
-### الموصى به
-- **8GB RAM أو أكثر**: لأداء أفضل
-- **SSD**: لسرعة أعلى
-- **CPU حديث**: لمعالجة أسرع
-
----
-
-## 🚀 التثبيت والنشر
-
-### 1. استنساخ المستودع
+### 🚀 Quick Start
 
 ```bash
-git clone https://github.com/yk445kauod-coder/origami-ai.git
-cd origami-ai
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-### 2. تشغيل Docker Compose
+### 📦 Deploy to GitHub Pages
 
 ```bash
-# تشغيل جميع الخدمات
-docker-compose up -d
-
-# التحقق من الخدمات
-docker-compose ps
-
-# عرض السجلات
-docker-compose logs -f app
+# Deploy to GitHub Pages
+npm run deploy
 ```
 
-### 3. الوصول للتطبيق
+### 🛠️ Tech Stack
 
-بعد تشغيل Docker Compose، يمكنك الوصول للتطبيق على:
+- **Framework**: React 19 with TypeScript
+- **Build Tool**: Vite
+- **Database**: Firebase Realtime Database
+- **Authentication**: Firebase Anonymous Auth
+- **Styling**: Custom CSS with CSS Variables
+- **Icons**: Font Awesome 6.4
+- **Fonts**: Tajawal (Arabic)
 
-- **التطبيق**: http://localhost:3000
-- **قاعدة البيانات MySQL**: localhost:3306
-- **Ollama**: http://localhost:11434
-- **Redis**: localhost:6379
-
-### 4. التكوين الأولي
-
-عند الوصول للتطبيق لأول مرة:
-
-1. قم بتسجيل الدخول أو إنشاء حساب جديد
-2. انتقل إلى صفحة الإعدادات لتكوين النماذج
-3. تأكد من أن Ollama متصل وجاهز
-4. ابدأ باستيراد بياناتك
-
----
-
-## 📖 دليل الاستخدام
-
-### استيراد البيانات
-
-1. انقر على **"استيراد البيانات"** من القائمة الجانبية
-2. اختر ملفك (CSV أو Excel)
-3. اختر المشروع أو أنشئ مشروعاً جديداً
-4. انقر على **"رفع"** وانتظر المعالجة
-
-### تحليل البيانات
-
-1. بعد استيراد البيانات، انقر على **"تحليل"**
-2. اختر نوع التحليل (ملخص، رؤى، اتجاهات)
-3. اختر النموذج (Egytronic_1.0 هو الافتراضي)
-4. انتظر النتائج
-
-### الأسئلة والأجوبة
-
-1. انقر على **"اسأل عن بياناتك"**
-2. اكتب سؤالك بصيغة طبيعية
-3. سيجيب الذكاء الاصطناعي على سؤالك
-4. احفظ المحادثة للرجوع إليها لاحقاً
-
-### لوحات المعلومات
-
-1. انقر على **"لوحات المعلومات"**
-2. أنشئ لوحة معلومات جديدة
-3. أضف الرسوم البيانية والمقاييس
-4. خصص حسب احتياجاتك
-
----
-
-## ⚙️ المتغيرات البيئية
-
-قم بإنشاء ملف `.env` في جذر المشروع:
-
-```env
-# قاعدة البيانات
-DATABASE_URL=mysql://origami_user:origami_pass@db:3306/origami_db
-
-# Ollama
-OLLAMA_URL=http://ollama:11434
-OLLAMA_DEFAULT_MODEL=egytronic_1.0
-
-# الأمان
-JWT_SECRET=your_jwt_secret_key_change_in_production
-
-# التطبيق
-NODE_ENV=production
-PORT=3000
-
-# OAuth
-VITE_APP_ID=origami
-OAUTH_SERVER_URL=https://api.manus.im
-VITE_OAUTH_PORTAL_URL=https://portal.manus.im
-
-# Redis (اختياري)
-REDIS_URL=redis://redis:6379
-```
-
----
-
-## 🧪 الاختبار
-
-### تشغيل الاختبارات
-
-```bash
-# تشغيل جميع الاختبارات
-pnpm test
-
-# تشغيل اختبارات محددة
-pnpm test server/db.test.ts
-
-# مراقبة الاختبارات
-pnpm test --watch
-```
-
-### الاختبار اليدوي
-
-1. تشغيل التطبيق: `pnpm dev`
-2. فتح المتصفح: http://localhost:3000
-3. اختبار جميع الميزات:
-   - استيراد ملف CSV
-   - تحليل البيانات
-   - طرح أسئلة
-   - عرض الرسوم البيانية
-
----
-
-## 📁 هيكل المشروع
+### 📁 Project Structure
 
 ```
-origami-ai/
-├── client/                 # الواجهة الأمامية (Next.js)
-│   ├── src/
-│   │   ├── pages/         # صفحات التطبيق
-│   │   ├── components/    # مكونات React
-│   │   ├── lib/           # دوال مساعدة
-│   │   └── index.css      # الأنماط العامة
-│   └── public/            # ملفات عامة
-├── server/                # الخادم (Express)
-│   ├── routers.ts         # مسارات tRPC
-│   ├── db.ts              # دوال قاعدة البيانات
-│   ├── ollama.ts          # خدمة Ollama
-│   ├── fileProcessor.ts   # معالجة الملفات
-│   └── _core/             # الملفات الأساسية
-├── drizzle/               # قاعدة البيانات
-│   ├── schema.ts          # تعريف الجداول
-│   └── migrations/        # ملفات الهجرة
-├── docker-compose.yml     # تكوين Docker
-├── Dockerfile             # صورة Docker
-├── README.md              # هذا الملف
-└── LICENSE                # رخصة MIT
+egytronic-chat/
+├── src/
+│   ├── components/     # React components
+│   ├── data/          # Static data (emojis)
+│   ├── hooks/         # Custom React hooks
+│   ├── types/         # TypeScript types
+│   ├── App.tsx        # Main app component
+│   ├── App.css        # App styles
+│   ├── firebase.ts    # Firebase configuration
+│   └── main.tsx       # Entry point
+├── public/            # Static assets
+├── dist/              # Production build
+└── package.json
 ```
 
----
+### 🎨 Pixel Art Emoji Pack
 
-## 🔧 الأوامر المهمة
+The app includes a custom 25-emoji pixel art pack in JSON format. Each emoji contains:
+- Unique ID
+- Name and category
+- SVG representation (rendered as pixel art)
+- Shortcodes for easy insertion
 
-```bash
-# التطوير
-pnpm dev              # تشغيل في وضع التطوير
-pnpm build            # بناء المشروع
-pnpm start            # تشغيل في الإنتاج
-
-# قاعدة البيانات
-pnpm drizzle-kit generate    # توليد ملفات الهجرة
-pnpm drizzle-kit migrate     # تطبيق الهجرات
-
-# الاختبار والتحقق
-pnpm test             # تشغيل الاختبارات
-pnpm check            # التحقق من TypeScript
-pnpm format           # تنسيق الكود
-
-# Docker
-docker-compose up -d      # تشغيل الخدمات
-docker-compose down       # إيقاف الخدمات
-docker-compose logs -f    # عرض السجلات
+**Sample Emoji Structure:**
+```json
+{
+  "id": "pixel_smile",
+  "name": "Pixel Smile",
+  "unified": "1F600",
+  "shortcodes": [":)", ":-)", ":smile:"],
+  "category": "faces",
+  "svg": "<svg viewBox='0 0 16 16'...>"
+}
 ```
 
----
+### 🔥 Firebase Configuration
 
-## 🤝 المساهمة
+The app uses Firebase Realtime Database with the same configuration as the reference app. No additional setup is required - just deploy and use!
 
-نرحب بالمساهمات! يرجى:
+### 📱 Responsive Design
 
-1. عمل Fork للمستودع
-2. إنشاء فرع جديد (`git checkout -b feature/amazing-feature`)
-3. الالتزام بالتغييرات (`git commit -m 'Add amazing feature'`)
-4. دفع الفرع (`git push origin feature/amazing-feature`)
-5. فتح Pull Request
+- **Desktop**: Full Discord-style layout with sidebar
+- **Tablet**: Collapsible sidebar with hamburger menu
+- **Mobile**: Optimized touch controls with floating menu button
 
----
+### 🌐 Links
 
-## 📝 الترخيص
+- **Live App**: https://3000445.pages.dev
+- **Company Website**: https://egytronic.pages.dev
 
-هذا المشروع مرخص تحت رخصة MIT. انظر ملف [LICENSE](LICENSE) للتفاصيل.
+### 📝 License
 
----
-
-## 📞 الدعم والمساعدة
-
-### المشاكل الشائعة
-
-**المشكلة**: Ollama لا يتصل
-- **الحل**: تأكد من تشغيل Docker Compose وأن Ollama يعمل: `docker-compose ps`
-
-**المشكلة**: خطأ في قاعدة البيانات
-- **الحل**: تحقق من أن MySQL يعمل: `docker-compose logs db`
-
-**المشكلة**: الملف لا يتم تحميله
-- **الحل**: تأكد من أن الملف بصيغة CSV أو Excel صحيحة
-
-### الحصول على المساعدة
-
-- 📖 اقرأ [التوثيق الكاملة](docs/)
-- 🐛 أبلغ عن الأخطاء على [GitHub Issues](https://github.com/yk445kauod-coder/origami-ai/issues)
-- 💬 اطرح الأسئلة على [GitHub Discussions](https://github.com/yk445kauod-coder/origami-ai/discussions)
+MIT License - © 2025 Egytronic
 
 ---
 
-## 🎯 خارطة الطريق
-
-### المميزات القادمة
-- [ ] دعم قواعد البيانات المباشرة (PostgreSQL، MySQL)
-- [ ] التصدير المتقدم (PDF، PowerPoint)
-- [ ] المشاركة الآمنة للمشاريع
-- [ ] النسخ الاحتياطية التلقائية
-- [ ] التنبيهات والإشعارات
-- [ ] API عام للتكامل الخارجي
-
-### التحسينات المخطط لها
-- تحسين الأداء والسرعة
-- إضافة مزيد من النماذج المدعومة
-- تحسين واجهة المستخدم
-- توثيق أكثر تفصيلاً
-
----
-
-## 🙏 شكر وتقدير
-
-شكر خاص لـ:
-- [Ollama](https://ollama.ai) لتوفير نماذج الذكاء الاصطناعي المحلية
-- [Next.js](https://nextjs.org) لإطار العمل الرائع
-- [Tailwind CSS](https://tailwindcss.com) لنظام التصميم
-- [Recharts](https://recharts.org) لمكتبة الرسوم البيانية
-
----
-
-## 📊 الإحصائيات
-
-- **لغات البرمجة**: TypeScript، JavaScript
-- **عدد الملفات**: 50+
-- **عدد الأسطر البرمجية**: 5000+
-- **الاختبارات**: 20+
-- **الأداء**: <200ms لتحليل البيانات
-
----
-
-**صُنع بـ ❤️ من قبل فريق Origami**
-
-آخر تحديث: مايو 2026
+Made with ❤️ by **Egytronic**
