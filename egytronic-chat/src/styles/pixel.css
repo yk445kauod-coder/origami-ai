@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+:root {
+  --pixel-font: 'Press Start 2P', monospace;
+  --retro-font: 'VT323', monospace;
+  
+  --bg-dark: #1a1a2e;
+  --bg-darker: #16213e;
+  --bg-channel: #2d2d44;
+  --bg-input: #252538;
+  --bg-hover: #3d3d5c;
+  --bg-selected: #4a4a6a;
+  
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6b6b7b;
+  
+  --accent-purple: #9b59b6;
+  --accent-blue: #3498db;
+  --accent-green: #2ecc71;
+  --accent-red: #e74c3c;
+  --accent-yellow: #f1c40f;
+  --accent-orange: #e67e22;
+  --accent-pink: #e91e63;
+  
+  --pixel-border: 4px;
+  --pixel-radius: 8px;
+  --shadow-pixel: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  --glow-purple: 0 0 20px rgba(155, 89, 182, 0.5);
+  --glow-blue: 0 0 20px rgba(52, 152, 219, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  image-rendering: pixelated;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--retro-font);
+  font-size: 18px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+.pixel-text {
+  font-family: var(--pixel-font);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pixel-box {
+  background: var(--bg-channel);
+  border: var(--pixel-border) solid var(--accent-purple);
+  box-shadow: var(--shadow-pixel);
+  border-radius: var(--pixel-radius);
+}
+
+.pixel-button {
+  font-family: var(--pixel-font);
+  font-size: 10px;
+  background: var(--accent-purple);
+  color: white;
+  border: var(--pixel-border) solid white;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-pixel);
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.pixel-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.5);
+  background: var(--accent-blue);
+}
+
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+.glow-text {
+  text-shadow: var(--glow-purple);
+}
+
+@keyframes pixelFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pixelPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes pixelGlow {
+  0%, 100% { box-shadow: var(--glow-purple); }
+  50% { box-shadow: var(--glow-blue); }
+}
+
+.scrollbar-pixel::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar-pixel::-webkit-scrollbar-track {
+  background: var(--bg-darker);
+  border-left: 2px solid var(--accent-purple);
+}
+
+.scrollbar-pixel::-webkit-scrollbar-thumb {
+  background: var(--accent-purple);
+  border: 2px solid var(--bg-darker);
+}
+
+.scrollbar-pixel::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --pixel-font: 'Press Start 2P', monospace;
+    --retro-font: 'VT323', monospace;
+  }
+  
+  body {
+    font-size: 16px;
+  }
+}

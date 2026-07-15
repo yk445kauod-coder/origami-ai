@@ -1,0 +1,130 @@
+{
+  "name": "Egytronic Pixel Art Emoji Pack",
+  "version": "1.0.0",
+  "author": "Egytronic",
+  "license": "MIT",
+  "emojis": {
+    "smileys": {
+      "name": "الوجوه المبتسمة",
+      "emojis": [
+        { "id": "pixel_happy", "emoji": "😊", "name": "مبتسم", "tags": ["happy", "joy"] },
+        { "id": "pixel_laugh", "emoji": "😂", "name": "ضحك", "tags": ["laugh", "cry", "lol"] },
+        { "id": "pixel_love", "emoji": "😍", "name": "حب", "tags": ["love", "heart", "hearts"] },
+        { "id": "pixel_wink", "emoji": "😉", "name": "غمز", "tags": ["wink", "flirt"] },
+        { "id": "pixel_cool", "emoji": "😎", "name": "رائع", "tags": ["cool", "sunglasses"] },
+        { "id": "pixel_think", "emoji": "🤔", "name": "تفكير", "tags": ["think", "hmm"] },
+        { "id": "pixel_sleep", "emoji": "😴", "name": "نائم", "tags": ["sleep", "zzz"] },
+        { "id": "pixel_cry", "emoji": "😭", "name": "باكي", "tags": ["cry", "sad", "tears"] },
+        { "id": "pixel_angry", "emoji": "😡", "name": "غاضب", "tags": ["angry", "mad"] }
+      ]
+    },
+    "gestures": {
+      "name": "الإيماءات",
+      "emojis": [
+        { "id": "pixel_thumbsup", "emoji": "👍", "name": "إبهام لأعلى", "tags": ["thumbsup", "good", "ok"] },
+        { "id": "pixel_thumbsdown", "emoji": "👎", "name": "إبهام لأسفل", "tags": ["thumbsdown", "bad"] },
+        { "id": "pixel_clap", "emoji": "👏", "name": "تصفيق", "tags": ["clap", "bravo"] },
+        { "id": "pixel_fist", "emoji": "✊", "name": "قبضة", "tags": ["fist", "power"] },
+        { "id": "pixel_rock", "emoji": "🤘", "name": "روك", "tags": ["rock", "metal"] },
+        { "id": "pixel_peace", "emoji": "✌️", "name": "سلم", "tags": ["peace", "victory"] },
+        { "id": "pixel_wave", "emoji": "👋", "name": "تلويح", "tags": ["wave", "hi", "hello"] },
+        { "id": "pixel_pray", "emoji": "🤲", "name": "دعاء", "tags": ["pray", "please"] }
+      ]
+    },
+    "hearts": {
+      "name": "القلوب",
+      "emojis": [
+        { "id": "pixel_red_heart", "emoji": "❤️", "name": "قلب أحمر", "tags": ["heart", "love", "red"] },
+        { "id": "pixel_pink_heart", "emoji": "💖", "name": "قلب وردي", "tags": ["heart", "pink", "sparkle"] },
+        { "id": "pixel_blue_heart", "emoji": "💙", "name": "قلب أزرق", "tags": ["heart", "blue"] },
+        { "id": "pixel_green_heart", "emoji": "💚", "name": "قلب أخضر", "tags": ["heart", "green"] },
+        { "id": "pixel_yellow_heart", "emoji": "💛", "name": "قلب أصفر", "tags": ["heart", "yellow"] },
+        { "id": "pixel_purple_heart", "emoji": "💜", "name": "قلب بنفسجي", "tags": ["heart", "purple"] },
+        { "id": "pixel_broken_heart", "emoji": "💔", "name": "قلب مكسور", "tags": ["broken", "sad", "heartbreak"] },
+        { "id": "pixel_growing_heart", "emoji": "💕", "name": "قلب نامي", "tags": ["growing", "hearts"] }
+      ]
+    },
+    "animals": {
+      "name": "الحيوانات",
+      "emojis": [
+        { "id": "pixel_cat", "emoji": "🐱", "name": "قطة", "tags": ["cat", "kitty", "meow"] },
+        { "id": "pixel_dog", "emoji": "🐕", "name": "كلب", "tags": ["dog", "puppy", "woof"] },
+        { "id": "pixel_rabbit", "emoji": "🐰", "name": "أرنب", "tags": ["rabbit", "bunny"] },
+        { "id": "pixel_panda", "emoji": "🐼", "name": "باندا", "tags": ["panda", "bear"] },
+        { "id": "pixel_fox", "emoji": "🦊", "name": "ثعلب", "tags": ["fox"] },
+        { "id": "pixel_unicorn", "emoji": "🦄", "name": "يونيكورن", "tags": ["unicorn", "magic"] },
+        { "id": "pixel_dragon", "emoji": "🐉", "name": "تنين", "tags": ["dragon"] },
+        { "id": "pixel_octopus", "emoji": "🐙", "name": "أخطبوط", "tags": ["octopus"] }
+      ]
+    },
+    "food": {
+      "name": "الطعام",
+      "emojis": [
+        { "id": "pixel_pizza", "emoji": "🍕", "name": "بيتزا", "tags": ["pizza"] },
+        { "id": "pixel_burger", "emoji": "🍔", "name": "برجر", "tags": ["burger", "hamburger"] },
+        { "id": "pixel_fries", "emoji": "🍟", "name": "بطاطس", "tags": ["fries"] },
+        { "id": "pixel_icecream", "emoji": "🍦", "name": "آيس كريم", "tags": ["ice cream", "dessert"] },
+        { "id": "pixel_cake", "emoji": "🎂", "name": "كيك", "tags": ["cake", "birthday"] },
+        { "id": "pixel_coffee", "emoji": "☕", "name": "قهوة", "tags": ["coffee", "drink"] },
+        { "id": "pixel_sushi", "emoji": "🍣", "name": "سوشي", "tags": ["sushi"] },
+        { "id": "pixel_taco", "emoji": "🌮", "name": "تاكو", "tags": ["taco", "mexican"] }
+      ]
+    },
+    "activities": {
+      "name": "الأنشطة",
+      "emojis": [
+        { "id": "pixel_gaming", "emoji": "🎮", "name": "ألعاب", "tags": ["gaming", "game", "play"] },
+        { "id": "pixel_music", "emoji": "🎵", "name": "موسيقى", "tags": ["music", "note"] },
+        { "id": "pixel_movie", "emoji": "🎬", "name": "فيلم", "tags": ["movie", "film"] },
+        { "id": "pixel_sport", "emoji": "⚽", "name": "كرة قدم", "tags": ["football", "soccer"] },
+        { "id": "pixel_basketball", "emoji": "🏀", "name": "كرة سلة", "tags": ["basketball"] },
+        { "id": "pixel_swimming", "emoji": "🏊", "name": "سباحة", "tags": ["swimming"] },
+        { "id": "pixel_dancing", "emoji": "💃", "name": "رقص", "tags": ["dancing", "dance"] },
+        { "id": "pixel_party", "emoji": "🎉", "name": "حفلة", "tags": ["party", "celebration"] }
+      ]
+    },
+    "symbols": {
+      "name": "الرموز",
+      "emojis": [
+        { "id": "pixel_star", "emoji": "⭐", "name": "نجمة", "tags": ["star", "favorite"] },
+        { "id": "pixel_fire", "emoji": "🔥", "name": "نار", "tags": ["fire", "hot", "lit"] },
+        { "id": "pixel_100", "emoji": "💯", "name": "مئة", "tags": ["100", "perfect"] },
+        { "id": "pixel_money", "emoji": "💰", "name": "مال", "tags": ["money", "cash"] },
+        { "id": "pixel_gem", "emoji": "💎", "name": "جوهرة", "tags": ["gem", "diamond"] },
+        { "id": "pixel_rainbow", "emoji": "🌈", "name": "قوس قزح", "tags": ["rainbow"] },
+        { "id": "pixel_sparkle", "emoji": "✨", "name": "تألق", "tags": ["sparkle", "shine"] },
+        { "id": "pixel_lightning", "emoji": "⚡", "name": "برق", "tags": ["lightning", "fast"] }
+      ]
+    },
+    "egypt": {
+      "name": "مصري",
+      "emojis": [
+        { "id": "pixel_pyramid", "emoji": "🗿", "name": "هرم", "tags": ["pyramid", "egypt"] },
+        { "id": "pixel_sphinx", "emoji": "🛕", "name": "أبو الهول", "tags": ["sphinx", "temple"] },
+        { "id": "pixel_nile", "emoji": "🌊", "name": "نهر النيل", "tags": ["nile", "water"] },
+        { "id": "pixel_sun", "emoji": "☀️", "name": "شمس", "tags": ["sun", "egypt"] },
+        { "id": "pixel_camel", "emoji": "🐪", "name": "جمل", "tags": ["camel", "desert"] },
+        { "id": "pixel_palm", "emoji": "🌴", "name": "نخيل", "tags": ["palm", "tree"] },
+        { "id": "pixel_scarab", "emoji": "🪲", "name": "خنفساء", "tags": ["scarab", "beetle"] },
+        { "id": "pixel_cleopatra", "emoji": "👸", "name": "كليوباترا", "tags": ["queen", "cleopatra"] }
+      ]
+    },
+    "reactions": {
+      "name": "التفاعلات",
+      "emojis": [
+        { "id": "pixel_like", "emoji": "👍", "name": "إعجاب", "tags": ["like", "good"] },
+        { "id": "pixel_love_react", "emoji": "❤️", "name": "حب", "tags": ["love", "heart"] },
+        { "id": "pixel_haha", "emoji": "😂", "name": "هههه", "tags": ["haha", "laugh"] },
+        { "id": "pixel_wow", "emoji": "😮", "name": "واو", "tags": ["wow", "surprised"] },
+        { "id": "pixel_sad_react", "emoji": "😢", "name": "حزن", "tags": ["sad", "cry"] },
+        { "id": "pixel_angry_react", "emoji": "😠", "name": "غضب", "tags": ["angry", "mad"] }
+      ]
+    }
+  },
+  "flatList": [
+    "😊", "😂", "😍", "😉", "😎", "🤔", "😴", "😭", "😡", "👍", "👎", "👏", "✊", "🤘", "✌️", "👋",
+    "❤️", "💖", "💙", "💚", "💛", "💜", "💔", "💕", "🐱", "🐕", "🐰", "🐼", "🦊", "🦄", "🐉", "🐙",
+    "🍕", "🍔", "🍟", "🍦", "🎂", "☕", "🍣", "🌮", "🎮", "🎵", "🎬", "⚽", "🏀", "🏊", "💃", "🎉",
+    "⭐", "🔥", "💯", "💰", "💎", "🌈", "✨", "⚡", "🗿", "🛕", "🌊", "☀️", "🐪", "🌴", "👸", "😮", "😢", "😠"
+  ]
+}
