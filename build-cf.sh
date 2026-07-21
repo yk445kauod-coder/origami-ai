@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# Build the project
+echo "Building Azura Cafe..."
 pnpm build
 
-# Copy dist folder to root for Cloudflare Pages
+echo "Copying dist to root..."
 rm -rf dist
 cp -r artifacts/azura/dist dist
 
-echo "Build complete. Output copied to dist/"
+echo "Done!"
