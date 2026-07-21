@@ -302,6 +302,7 @@ const MenuItemCard = memo(({
 }) => {
   const cat = CATS.find(c => c.id === item.category) || CATS.find(c => (CAT_ALIASES[c.id] || []).includes(item.category));
   const hasDesc = lang === "ar" ? item.descriptionAr : item.description;
+  const isNew = item.category === "new_items" && !item.recommended;
 
   return (
     <div
@@ -311,42 +312,80 @@ const MenuItemCard = memo(({
         animationDelay: `${idx * 20}ms`,
         animation: "fadeInSimple 0.25s ease-out forwards",
         contentVisibility: "auto",
-        containIntrinsicSize: "0 150px"
+        containIntrinsicSize: "0 160px"
       }}
     >
-      <div className="h-full rounded-2xl bg-card border border-border/30 p-3 shadow-md hover:shadow-lg active:scale-[0.97] transition-all duration-200 group-hover:border-primary/20 flex flex-col justify-between">
-        <div>
-          {/* Badges/Category & Recommendation */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="px-1.5 py-0.5 rounded-full bg-primary/5 text-primary text-[8px] font-bold flex items-center gap-1">
-              <span>{cat?.emoji || "🍽️"}</span>
-              <span>{lang === "ar" ? cat?.ar : cat?.en}</span>
-            </div>
+      <div
+        className="h-full rounded-2xl p-4 flex flex-col justify-between active:scale-[0.97] transition-all duration-200"
+        style={{
+          background: "linear-gradient(145deg, #FFFDF7 0%, #FDF5E6 100%)",
+          border: "1px solid rgba(210,180,140,0.35)",
+          boxShadow: "0 2px 12px rgba(101,67,33,0.08), 0 1px 3px rgba(101,67,33,0.06)",
+        }}
+      >
+        {/* Top row: emoji + badges */}
+        <div className="flex items-start justify-between mb-3">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+            style={{ background: "rgba(101,67,33,0.07)" }}
+          >
+            {cat?.emoji || "🍽️"}
+          </div>
+          <div className="flex flex-col items-end gap-1">
             {item.recommended && (
-              <span className="text-[10px]" title={lang === "ar" ? "مُوصى به" : "Recommended"}>⭐</span>
+              <span
+                className="text-[9px] font-extrabold px-2 py-0.5 rounded-full"
+                style={{ background: "linear-gradient(90deg,#f59e0b,#ea580c)", color: "#fff", letterSpacing: "0.04em" }}
+              >
+                {lang === "ar" ? "⭐ مُوصى" : "⭐ Pick"}
+              </span>
             )}
-            {!item.recommended && item.category === "new_items" && (
-              <span className="text-[8px] font-bold text-red-500 uppercase">{lang === "ar" ? "جديد" : "NEW"}</span>
+            {isNew && (
+              <span
+                className="text-[9px] font-extrabold px-2 py-0.5 rounded-full"
+                style={{ background: "linear-gradient(90deg,#22c55e,#16a34a)", color: "#fff", letterSpacing: "0.04em" }}
+              >
+                {lang === "ar" ? "جديد" : "NEW"}
+              </span>
             )}
           </div>
-
-          <h3 className="font-bold text-sm text-foreground line-clamp-1 leading-snug">
-            {lang === "ar" ? item.nameAr : item.name}
-          </h3>
-
-          <p className="text-[10px] text-muted-foreground line-clamp-2 mt-1 min-h-[24px] leading-relaxed">
-            {hasDesc ? hasDesc : (lang === "ar" ? "اضغط لعرض المكونات والتفاصيل الكاملة" : "Click to view ingredients and details")}
-          </p>
         </div>
 
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/10">
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-sm font-black text-primary">{item.price}</span>
-            <span className="text-[8px] text-muted-foreground font-bold uppercase">{lang === "ar" ? "ج.م" : "EGP"}</span>
+        {/* Name */}
+        <h3
+          className="font-extrabold text-sm line-clamp-2 leading-snug mb-1.5"
+          style={{ color: "#2D1B0F" }}
+        >
+          {lang === "ar" ? item.nameAr : item.name}
+        </h3>
+
+        {/* Description */}
+        <p className="text-[10px] line-clamp-2 leading-relaxed flex-1"
+          style={{ color: "rgba(101,67,33,0.65)" }}>
+          {hasDesc || (lang === "ar" ? "مكونات طازجة عالية الجودة" : "Premium fresh ingredients")}
+        </p>
+
+        {/* Price row */}
+        <div
+          className="flex items-center justify-between mt-3 pt-2.5"
+          style={{ borderTop: "1px dashed rgba(210,180,140,0.5)" }}
+        >
+          <div className="flex items-baseline gap-1">
+            <span
+              className="text-base font-black"
+              style={{ color: "#654321" }}
+            >
+              {item.price}
+            </span>
+            <span className="text-[9px] font-bold" style={{ color: "rgba(101,67,33,0.5)" }}>
+              {lang === "ar" ? "ج.م" : "EGP"}
+            </span>
           </div>
-          <div className="text-[9px] text-primary/80 font-bold group-hover:text-primary transition-colors flex items-center gap-0.5">
-            <span>{lang === "ar" ? "تفاصيل" : "Details"}</span>
-            <span className="text-[8px]">{lang === "ar" ? "←" : "→"}</span>
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+            style={{ background: "linear-gradient(135deg, #654321, #8B4513)" }}
+          >
+            <span className="text-white text-[11px]">{lang === "ar" ? "←" : "→"}</span>
           </div>
         </div>
       </div>
@@ -378,67 +417,80 @@ function ItemModal({ item, onClose, lang }: { item: MenuItem; onClose: () => voi
         {/* Mobile Handle */}
         <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-2 sm:hidden" />
         <div className="overflow-y-auto p-6 sm:p-8 scroll-hide">
-          <div className="flex flex-col sm:flex-row gap-6">
-            {/* Image */}
-            <div className="w-full sm:w-48 h-48 sm:h-48 rounded-2xl overflow-hidden bg-muted flex-shrink-0">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-6xl">
-                  {cat?.emoji || "🍽️"}
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground leading-tight">
+          {/* Header: emoji + name + close */}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                style={{ background: "rgba(101,67,33,0.08)" }}
+              >
+                {cat?.emoji || "🍽️"}
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl font-extrabold leading-tight" style={{ color: "#2D1B0F" }}>
+                  {lang === "ar" ? item.nameAr : item.name}
+                </h2>
+                {lang === "ar" ? (item.name && (
+                  <p className="text-sm font-medium mt-0.5" style={{ color: "rgba(101,67,33,0.6)" }}>
                     {item.name}
-                  </h2>
-                  {item.nameAr && (
-                    <p className="text-lg text-muted-foreground font-medium mt-1" dir="rtl">
-                      {item.nameAr}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={lang === "ar" ? "إغلاق" : "Close"}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl font-black text-primary">
-                  {item.price}
-                </span>
-                <span className="text-sm text-muted-foreground font-bold uppercase tracking-wider">
-                  {lang === "ar" ? "ج.م" : "EGP"}
-                </span>
-                {cat && (
-                  <span className="ml-auto badge bg-primary/5 text-primary border border-primary/10">
-                    {cat.emoji} {lang === "ar" ? cat.ar : cat.en}
-                  </span>
-                )}
-              </div>
-
-              {/* Description */}
-              {(item.description || item.descriptionAr) && (
-                <div className="mb-6 p-4 rounded-2xl bg-muted/30 border border-border/30">
-                  <p className="text-sm text-foreground/80 leading-relaxed italic">
-                    "{lang === "ar" ? (item.descriptionAr || item.description) : item.description}"
                   </p>
-                </div>
-              )}
+                )) : (item.nameAr && (
+                  <p className="text-sm font-medium mt-0.5" dir="rtl" style={{ color: "rgba(101,67,33,0.6)" }}>
+                    {item.nameAr}
+                  </p>
+                ))}
+              </div>
             </div>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
+              style={{ background: "rgba(101,67,33,0.08)", color: "#654321" }}
+              aria-label={lang === "ar" ? "إغلاق" : "Close"}
+            >
+              <X size={18} />
+            </button>
           </div>
+
+          {/* Price + Category pill */}
+          <div className="flex items-center gap-3 mb-5">
+            <div
+              className="flex items-baseline gap-1.5 px-4 py-2 rounded-2xl"
+              style={{ background: "linear-gradient(135deg, #654321, #8B4513)" }}
+            >
+              <span className="text-2xl font-black text-white">{item.price}</span>
+              <span className="text-xs font-bold text-white/70 uppercase tracking-wider">
+                {lang === "ar" ? "ج.م" : "EGP"}
+              </span>
+            </div>
+            {cat && (
+              <span
+                className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
+                style={{ background: "rgba(101,67,33,0.07)", color: "#654321" }}
+              >
+                {cat.emoji} {lang === "ar" ? cat.ar : cat.en}
+              </span>
+            )}
+            {item.recommended && (
+              <span
+                className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{ background: "linear-gradient(90deg,#f59e0b,#ea580c)", color: "#fff" }}
+              >
+                ⭐ {tr("Top Pick", "الأفضل")}
+              </span>
+            )}
+          </div>
+
+          {/* Description */}
+          {(item.description || item.descriptionAr) && (
+            <div
+              className="mb-5 p-4 rounded-2xl"
+              style={{ background: "rgba(101,67,33,0.05)", border: "1px solid rgba(210,180,140,0.4)" }}
+            >
+              <p className="text-sm leading-relaxed italic" style={{ color: "rgba(45,27,15,0.75)" }}>
+                "{lang === "ar" ? (item.descriptionAr || item.description) : item.description}"
+              </p>
+            </div>
+          )}
           
           <div className="mt-6 space-y-6">
             {/* Ingredients */}
