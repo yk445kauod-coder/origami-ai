@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { db, ref, onValue } from "@/lib/firebase";
+import { db, ref, get } from "@/lib/firebase";
 
 export type BaristaPersona = "female" | "male";
 
@@ -32,9 +32,12 @@ export function BaristaProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    // Load barista & cafe config from Firebase
-    const unsub = onValue(ref(db, "ai-config"), (snap) => {
-      if (snap.exists()) {
+    // Poll AI/barista config every 2 minutes — no persistent live connection needed
+    let isCancelled = false;
+    const fetchConfig = async () => {
+      try {
+        const snap = await get(ref(db, "ai-config"));
+        if (isCancelled || !snap.exists()) return;
         const cfg = snap.val() as any;
         if (cfg.baristaName) setBaristaName(cfg.baristaName);
         if (cfg.baristaAvatar) setBaristaAvatar(cfg.baristaAvatar);
@@ -43,9 +46,11 @@ export function BaristaProvider({ children }: { children: ReactNode }) {
         if (cfg.cafeLocation) setCafeInfo(prev => ({ ...prev, location: cfg.cafeLocation }));
         if (cfg.cafeHours) setCafeInfo(prev => ({ ...prev, hours: cfg.cafeHours }));
         if (cfg.cafePhone) setCafeInfo(prev => ({ ...prev, phone: cfg.cafePhone }));
-      }
-    });
-    return () => unsub();
+      } catch { /* silent */ }
+    };
+    fetchConfig();
+    const interval = setInterval(fetchConfig, 120000);
+    return () => { isCancelled = true; clearInterval(interval); };
   }, []);
 
   const setPersona = (_p: BaristaPersona) => {

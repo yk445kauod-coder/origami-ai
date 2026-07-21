@@ -1,0 +1,59 @@
+study the codebase deeply
+first make sure the sections arrangment is right the fisrt top picks then new items then breakfast then the food categories then the barista categories , , make sure dont forget any item or category make admin can add another categories and can rearrange any thing anc can test everthig or edit every single thing , mae sue in menu page in header beside of azura logo is the social media hyper links
+
+instagram with instagram icon @azuracafeegy tiktok @azuracafee
+
+https://web.facebook.com/p/Azura-cafe-restaurant-61577762257966
+
+
+
+and finally make sure this is the mneu updated https://drive.google.com/drive/shared-with-me?fbclid=IwY2xjawTLL-tleHRuA2FlbQIxMABicmlkETEzcTZ4WTMzNDRYODJqa0Rjc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHuoIBN6q4xkP4OplOTZRW3AsZDV9T4Z01BBmXKw1XPcyxwZxG39UZBE-OP10_aem_omlu9_HkgXCgxscRfXiFAQ
+
+
+or if you cant acces this azura-menu.pages.dev
+
+and make sure no any items iwth images or pics just teh headers of banners
+and add new page called offers its before the top picks make sure it dynamically too , dont add thing make admin add it from admin page
+
+
+المشكلة: بستخدم خطة Firebase المجانية (Spark)، وفيها حد أقصى لعدد الاتصالات الحية المتزامنة (live connections) مع قاعدة البيانات. المنيو والـ Reels بتتحدث حاليًا عن طريق اتصال حي دائم (onValue) مع كل زائر، فلو عدد الزوار زاد ممكن نتجاوز الحد وتتعطل الخدمة.
+
+اللي عايزه: قلل عدد الاتصالات الحية الدائمة قدر الإمكان، خصوصًا في الأجزاء اللي مش لازم تكون لحظية بالثانية زي المنيو والـ Reels — يعني بدل ما كل زائر يفضل متصل باستمرار عشان يستنى تحديث، خليه يتأكد كل فترة (مش لحظي أوي) لو فيه تحديث جديد وقتها بس يجيب البيانات.
+
+أما الشات والـ AI فيفضلوا لحظيين زي ما هما، لأن عدد الناس اللي بيستخدموهم في نفس الوقت قليل وآمن.
+
+ده تطبيق شغال في الإنتاج (production)، فالتعديل ده لازم يكون آمن جدًا:
+
+ماينفعش يحصل أي تغيير في الشكل أو السلوك اللي الزبون شايفه، ولا في وظائف الأدمن بانل.
+ماينفعش يحصل أي كسر أو error في أي جزء من التطبيق.
+التعديل يكون في طريقة جلب البيانات بس (البروتوكول)، مش في المنطق أو الميزات.
+اختبر الكود كويس بعد التعديل وتأكد إن كل حاجة شغالة زي الأول تمامًا قبل ما تعتبر المهمة خلصت.
+راجع كل الأماكن اللي فيها اتصال دائم مع Firebase وقلل منها حسب المنطق ده بحذر شديد، وقولي إيه اللي عدّلته وليه.
+fast as you can please and dont forget e2e test
+MAKE UPDATE is updatig if dmin update somthing to client app , and chat just when use go to chat page thge on value start
+
+
+
+MAKE UPDATE is updatig if dmin update somthing to client app , and chat just when use go to chat page thge on value start
+first : offers - top picks - breakfast - toast -croissant -soup -appetizers - salad -pasta - tortilla snadwiches -  vina sandwiches - main dishes -  beef burgers - smash burgers - fried chicken sandwiches - extra kitchen - barista: first hot drinks - espresso(S) " anything take espresso and hot - corto - hot chocolate-sahlab- frappe -ice cubes ( iced drinks) - mocktails " the lemons and mojitos" - boba tea -fresh juices -cocktails -smoothie -milkshake -waffle -desserts- crepe -mini panckaces -pancakes -extra drinks (suace flavor topping milk ice creame nuts pistachio espresso) - soft drinks- hookah -
+tell me what i should add in cloiudflare page deployment command and setting of build
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'query')
+    at af (content.js:37:129812)
+    at content.js:37:130679
+    at new Promise (<anonymous>)
+    at Object.get (content.js:37:130622)
+    at content.js:37:131422
+    at Ki (content.js:37:93193)
+    at pc (content.js:37:113279)
+    at content.js:37:109935
+    at k (content.js:28:1368)
+    at MessagePort.z (content.js:28:1891)
+index-DnecyhZm.js:2 Allow attribute will take precedence over 'allowfullscreen'.
+ie @ index-DnecyhZm.js:2
+api.groq.com/openai/v1/chat/completions:1          Failed to load resource: the server responded with a status of 429 ()
+crypto-H4YGxVvF.js:4 Groq API error, falling back to Pollinations: {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01knen21hgfj7vy5pm7v9e1xxg` service tier `on_demand` on tokens per minute (TPM): Limit 12000, Used 8770, Requested 10871. Please try again in 38.205s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}}
+
+
+v @ crypto-H4YGxVvF.js:4
+text.pollinations.ai/openai/chat/completions:1          Failed to load resource: the server responded with a status of 402 ()
+barista:1 Access to fetch at 'https://text.pollinations.ai/Assistant%3A%20Hi!%20I'm%20Zura!%20What%20can%20I%20get%20for%20you%20today%3F%20I'm%20here%20to%20help%20you%20explore%20our%20full%20menu!%0AUser%3A%20%D8%A7%D9%87%D9%84%D8%A7%0AAssistant%3A%20%D9%85%D8%B1%D8%AD%D8%A8%D8%A7!%20%D8%A7%D9%87%D9%84%D8%A7%20%D9%88%D8%B3%D9%87%D9%84%D8%A7!%20%D9%83%D9%8A%D9%81%20%D9%8A%D9%85%D9%83%D9%86%D9%86%D9%8A%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%AA%D9%83%20%D8%A7%D9%84%D9%8A%D9%88%D9%85%D...

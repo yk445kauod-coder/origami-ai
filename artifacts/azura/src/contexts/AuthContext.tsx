@@ -6,7 +6,7 @@ import {
   signInAnonymously, signInWithPopup,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   signOut, updateProfile,
-  ref, set, get, onValue, off, update,
+  ref, set, get, update,
   type User,
 } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -111,13 +111,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsub();
   }, []);
 
+  // Poll user profile every 60s instead of a persistent live connection
   useEffect(() => {
     if (!user) return;
+    let isCancelled = false;
     const profileRef = ref(db, `users/${user.uid}`);
-    onValue(profileRef, (snap) => {
-      if (snap.exists()) setProfile(snap.val());
-    });
-    return () => off(profileRef);
+    const poll = async () => {
+      try {
+        const snap = await get(profileRef);
+        if (!isCancelled && snap.exists()) setProfile(snap.val());
+      } catch { /* silent */ }
+    };
+    poll();
+    const interval = setInterval(poll, 60000);
+    return () => { isCancelled = true; clearInterval(interval); };
   }, [user?.uid]);
 
   const loginAnonymous = async (name: string, tableNum: string) => {

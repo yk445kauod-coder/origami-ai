@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BaristaProvider } from "@/contexts/BaristaContext";
-import { db, ref, onValue, off } from "@/lib/firebase";
+import { db, ref, get } from "@/lib/firebase";
 import { useEffect, useState, lazy, Suspense } from "react";
 import Layout from "@/components/Layout";
 import { seedMenuIfEmpty, mergeMenuIngredients, cleanDeletedItemsFromDB } from "@/lib/firebase";
@@ -48,20 +48,24 @@ function AppRoutes() {
       .catch(() => {});
   }, []);
 
-  // Listen for feature flags globally
+  // Poll feature flags every 5 minutes — Layout.tsx keeps a live onValue for real-time nav updates
   useEffect(() => {
-    const ffRef = ref(db, "feature-flags");
-    onValue(ffRef, (snap) => {
-      if (snap.exists()) {
+    let isCancelled = false;
+    const fetchFlags = async () => {
+      try {
+        const snap = await get(ref(db, "feature-flags"));
+        if (isCancelled || !snap.exists()) return;
         const d = snap.val();
         setFlags({
           baristaEnabled: d.baristaEnabled !== false,
           reelsEnabled: d.reelsEnabled !== false,
           supportEnabled: d.supportEnabled !== false,
         });
-      }
-    });
-    return () => off(ffRef);
+      } catch { /* silent */ }
+    };
+    fetchFlags();
+    const interval = setInterval(fetchFlags, 300000);
+    return () => { isCancelled = true; clearInterval(interval); };
   }, []);
 
   if (loading) {

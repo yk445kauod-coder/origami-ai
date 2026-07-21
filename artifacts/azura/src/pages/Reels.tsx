@@ -262,12 +262,12 @@ export default function Reels() {
 
     if (currentReel.category) {
       const affinityPath = `users/${user.uid}/preferences/affinities/${currentReel.category}`;
-      onValue(ref(db, affinityPath), (snap) => {
+      get(ref(db, affinityPath)).then((snap) => {
         const currentVal = snap.val() || 0;
         update(ref(db, `users/${user.uid}/preferences/affinities`), {
           [currentReel.category!]: liked ? Math.max(0, currentVal - 10) : currentVal + 20
         });
-      }, { onlyOnce: true });
+      }).catch(() => { /* silent */ });
     }
   };
 

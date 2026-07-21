@@ -71,91 +71,90 @@ function normalizeItem(id: string, raw: Record<string, unknown>, parentCategory?
 
 // Category order as specified by user
 const CATS = [
-  // Offers - Real category managed by admin
-  { id: "offers",          emoji: "🎁",  en: "Offers",             ar: "العروض"          },
-  // Main Menu
-  { id: "recommended",      emoji: "⭐",  en: "Top Picks",           ar: "الأفضل"          },
-  { id: "new_items",         emoji: "🆕",  en: "New Items",           ar: "جديد"            },
-  { id: "breakfast",        emoji: "🍳",  en: "Breakfast",           ar: "إفطار"           },
-  { id: "toast",            emoji: "🥪",  en: "Toast",               ar: "توست"            },
-  { id: "croissant",        emoji: "🥐",  en: "Croissant",           ar: "كرواسون"         },
-  { id: "soups",            emoji: "🍲",  en: "Soup",                ar: "شوربة"           },
-  { id: "appetizers",       emoji: "🍢",  en: "Appetizers",         ar: "مقبلات"          },
-  { id: "salads",           emoji: "🥗",  en: "Salads",              ar: "سلطات"           },
-  { id: "pasta",            emoji: "🍝",  en: "Pasta",               ar: "مكرونة"          },
-  { id: "tortilla",         emoji: "🌯",  en: "Tortilla Sandwiches",ar: "تورتيلا ساندوتش"  },
-  { id: "toast_sandwiches", emoji: "🥪",  en: "Vina Sandwiches",    ar: "ساندوتشات فينا"   },
-  { id: "main_dishes",      emoji: "🍽️",  en: "Main Dishes",         ar: "أطباق رئيسية"     },
-  { id: "burgers",          emoji: "🍔",  en: "Beef Burgers",         ar: "برجر لحم"        },
-  { id: "smash_burgers",    emoji: "🔥",  en: "Smash Burgers",       ar: "سماش برجر"       },
-  { id: "fried_chicken",    emoji: "🍗",  en: "Fried Chicken",      ar: "فراخ مقلية"      },
-  { id: "add_ons",          emoji: "➕",  en: "Extra Kitchen",        ar: "إضافات مطبخ"     },
-  
-  // Barista Section
-  { id: "hot_drinks",       emoji: "☕",  en: "Hot Drinks",          ar: "مشروبات ساخنة"   },
-  { id: "coffee",           emoji: "☕",  en: "Espresso (S)",        ar: "إسبريسو"         },
-  { id: "corto",            emoji: "🥛",  en: "Corto",               ar: "كورتو"           },
-  { id: "hot_chocolate",    emoji: "🍫",  en: "Hot Chocolate",       ar: "شوكولاتة ساخنة"  },
-  { id: "sahlab",           emoji: "🥛",  en: "Sahlab",              ar: "سحلب"            },
-  { id: "frappuccino",      emoji: "🧊",  en: "Frappe",              ar: "فرابتشينو"       },
-  { id: "iced_coffee",      emoji: "🧋",  en: "Ice Cubes",           ar: "مكعبات ثلج"      },
-  { id: "mojitos",          emoji: "🍹",  en: "Mojitos",             ar: "موجيتو"          },
-  { id: "mocktails",        emoji: "🍸",  en: "Mocktails",           ar: "موكتيل"          },
-  { id: "boba_tea",         emoji: "🧋",  en: "Boba Tea",            ar: "بوبا تي"         },
-  { id: "fresh_juices",     emoji: "🍊",  en: "Fresh Juices",        ar: "عصائر طازجة"     },
-  { id: "cocktails",        emoji: "🍹",  en: "Cocktails",           ar: "كوكتيل"          },
-  { id: "smoothies",        emoji: "🥤",  en: "Smoothie",            ar: "سموذي"           },
-  { id: "milkshakes",       emoji: "🥛",  en: "Milkshake",           ar: "ميلك شيك"        },
-  { id: "waffle",           emoji: "🧇",  en: "Waffle",               ar: "وافل"            },
-  { id: "desserts",         emoji: "🍰",  en: "Desserts",             ar: "حلويات"          },
-  { id: "crepes",           emoji: "🥞",  en: "Crepe",                ar: "كريب"            },
-  { id: "mini_pancakes",    emoji: "🥞",  en: "Mini Pancakes",        ar: "بان كيك مصغر"    },
-  { id: "pancakes",         emoji: "🥞",  en: "Pancakes",             ar: "بان كيك"         },
-  { id: "extra_drinks",     emoji: "🥤",  en: "Extra Drinks",          ar: "مشروبات إضافية"  },
-  { id: "soft_drinks",      emoji: "🥤",  en: "Soft Drinks",          ar: "مشروبات غازية"   },
-  { id: "shisha",           emoji: "💨",  en: "Hookah",               ar: "شيشة"            },
-  { id: "all",              emoji: "✨",  en: "All",                  ar: "الكل"            },
+  // --- Offers first ---
+  { id: "offers",          emoji: "🎁",  en: "Offers",                   ar: "العروض"              },
+  // --- Top Picks & New ---
+  { id: "recommended",     emoji: "⭐",  en: "Top Picks",                ar: "الأفضل"              },
+  { id: "new_items",       emoji: "🆕",  en: "New Items",                ar: "جديد"                },
+  // --- Food ---
+  { id: "breakfast",       emoji: "🍳",  en: "Breakfast",                ar: "إفطار"               },
+  { id: "toast",           emoji: "🥪",  en: "Toast",                    ar: "توست"                },
+  { id: "croissant",       emoji: "🥐",  en: "Croissant",                ar: "كرواسون"             },
+  { id: "soups",           emoji: "🍲",  en: "Soup",                     ar: "شوربة"               },
+  { id: "appetizers",      emoji: "🍢",  en: "Appetizers",               ar: "مقبلات"              },
+  { id: "salads",          emoji: "🥗",  en: "Salads",                   ar: "سلطات"               },
+  { id: "pasta",           emoji: "🍝",  en: "Pasta",                    ar: "مكرونة"              },
+  { id: "tortilla",        emoji: "🌯",  en: "Tortilla Sandwiches",      ar: "تورتيلا ساندوتش"     },
+  { id: "toast_sandwiches",emoji: "🥖",  en: "Vina Sandwiches",          ar: "ساندوتشات فينا"       },
+  { id: "main_dishes",     emoji: "🍽️",  en: "Main Dishes",              ar: "أطباق رئيسية"         },
+  { id: "burgers",         emoji: "🍔",  en: "Beef Burgers",             ar: "برجر لحم"            },
+  { id: "smash_burgers",   emoji: "🔥",  en: "Smash Burgers",            ar: "سماش برجر"           },
+  { id: "fried_chicken",   emoji: "🍗",  en: "Fried Chicken Sandwiches", ar: "ساندوتشات الفراخ"     },
+  { id: "add_ons",         emoji: "➕",  en: "Extra Kitchen",             ar: "إضافات مطبخ"         },
+  // --- Barista ---
+  { id: "hot_drinks",      emoji: "☕",  en: "Hot Drinks",               ar: "مشروبات ساخنة"       },
+  { id: "coffee",          emoji: "☕",  en: "Espresso (S)",             ar: "إسبريسو"             },
+  { id: "corto",           emoji: "🥛",  en: "Corto",                    ar: "كورتو"               },
+  { id: "hot_chocolate",   emoji: "🍫",  en: "Hot Chocolate",            ar: "شوكولاتة ساخنة"      },
+  { id: "sahlab",          emoji: "🥛",  en: "Sahlab",                   ar: "سحلب"                },
+  { id: "frappuccino",     emoji: "🧊",  en: "Frappe",                   ar: "فرابتشينو"           },
+  { id: "iced_coffee",     emoji: "🧋",  en: "Ice Cubes (Iced Drinks)",  ar: "مكعبات ثلج"          },
+  { id: "mocktails",       emoji: "🍹",  en: "Mocktails & Mojitos",      ar: "موكتيل وموجيتو"      },
+  { id: "boba_tea",        emoji: "🧋",  en: "Boba Tea",                 ar: "بوبا تي"             },
+  { id: "fresh_juices",    emoji: "🍊",  en: "Fresh Juices",             ar: "عصائر طازجة"         },
+  { id: "cocktails",       emoji: "🍸",  en: "Cocktails",                ar: "كوكتيل"              },
+  { id: "smoothies",       emoji: "🥤",  en: "Smoothie",                 ar: "سموذي"               },
+  { id: "milkshakes",      emoji: "🥛",  en: "Milkshake",                ar: "ميلك شيك"            },
+  { id: "waffle",          emoji: "🧇",  en: "Waffle",                   ar: "وافل"                },
+  { id: "desserts",        emoji: "🍰",  en: "Desserts",                 ar: "حلويات"              },
+  { id: "crepes",          emoji: "🥞",  en: "Crepe",                    ar: "كريب"                },
+  { id: "mini_pancakes",   emoji: "🥞",  en: "Mini Pancakes",            ar: "بان كيك مصغر"        },
+  { id: "pancakes",        emoji: "🥞",  en: "Pancakes",                 ar: "بان كيك"             },
+  { id: "extra_drinks",    emoji: "🥤",  en: "Extra Drinks",             ar: "مشروبات إضافية"      },
+  { id: "soft_drinks",     emoji: "🥤",  en: "Soft Drinks",              ar: "مشروبات غازية"       },
+  { id: "shisha",          emoji: "💨",  en: "Hookah",                   ar: "شيشة"                },
+  { id: "all",             emoji: "✨",  en: "All",                      ar: "الكل"                },
 ];
 
 const CAT_ALIASES: Record<string, string[]> = {
-  recommended:     ["recommended"],
-  new_items:       ["new_items"],
-  appetizers:      ["appetizers", "appetizer"],
-  soups:           ["soups", "soup"],
-  salads:          ["salads", "salad"],
-  pasta:           ["pasta"],
-  tortilla:        ["tortilla"],
+  recommended:      ["recommended"],
+  new_items:        ["new_items"],
+  appetizers:       ["appetizers", "appetizer"],
+  soups:            ["soups", "soup"],
+  salads:           ["salads", "salad"],
+  pasta:            ["pasta"],
+  tortilla:         ["tortilla"],
   toast_sandwiches: ["toast_sandwiches", "vina_sandwiches", "sandwiches"],
-  toast:           ["toast"],
-  croissant:       ["croissant"],
-  breakfast:       ["breakfast"],
-  main_dishes:     ["main_dishes"],
-  burgers:         ["burgers", "burger", "beef_burgers"],
-  smash_burgers:   ["smash_burgers"],
-  fried_chicken:   ["fried_chicken"],
-  hot_drinks:      ["hot_drinks", "hot_drink"],
-  coffee:          ["coffee", "espresso", "espresso_s"],
-  corto:           ["corto"],
-  hot_chocolate:   ["hot_chocolate"],
-  sahlab:          ["sahlab"],
-  frappuccino:     ["frappuccino", "frappe"],
-  iced_coffee:     ["iced_coffee", "iced_drinks", "ice_cubes"],
-  mojitos:         ["mojitos", "mojito"],
-  mocktails:       ["mocktails", "mocktail"],
-  cocktails:       ["cocktails", "cocktail"],
-  boba_tea:        ["boba_tea"],
-  fresh_juices:    ["fresh_juices", "fresh_juice"],
-  smoothies:       ["smoothies", "smoothie"],
-  milkshakes:      ["milkshakes", "milkshake"],
-  waffle:          ["waffle"],
-  desserts:        ["desserts", "dessert"],
-  crepes:          ["crepes", "crepe"],
-  mini_pancakes:   ["mini_pancakes", "mini_pancake"],
-  pancakes:        ["pancakes"],
-  add_ons:         ["add_ons", "extra_kitchen", "fries"],
-  extra_drinks:    ["extra_drinks", "extra_drink"],
-  shisha:          ["shisha", "hookah"],
-  soft_drinks:     ["soft_drinks"],
+  toast:            ["toast"],
+  croissant:        ["croissant"],
+  breakfast:        ["breakfast"],
+  main_dishes:      ["main_dishes"],
+  burgers:          ["burgers", "burger", "beef_burgers"],
+  smash_burgers:    ["smash_burgers"],
+  fried_chicken:    ["fried_chicken", "fried_chicken_sandwiches"],
+  hot_drinks:       ["hot_drinks", "hot_drink"],
+  coffee:           ["coffee", "espresso", "espresso_s"],
+  corto:            ["corto"],
+  hot_chocolate:    ["hot_chocolate"],
+  sahlab:           ["sahlab"],
+  frappuccino:      ["frappuccino", "frappe"],
+  iced_coffee:      ["iced_coffee", "iced_drinks", "ice_cubes"],
+  // mojitos merged into mocktails — lemon drinks + mojito items all shown under mocktails
+  mocktails:        ["mocktails", "mocktail", "mojitos", "mojito"],
+  cocktails:        ["cocktails", "cocktail"],
+  boba_tea:         ["boba_tea"],
+  fresh_juices:     ["fresh_juices", "fresh_juice"],
+  smoothies:        ["smoothies", "smoothie"],
+  milkshakes:       ["milkshakes", "milkshake"],
+  waffle:           ["waffle"],
+  desserts:         ["desserts", "dessert"],
+  crepes:           ["crepes", "crepe"],
+  mini_pancakes:    ["mini_pancakes", "mini_pancake"],
+  pancakes:         ["pancakes"],
+  add_ons:          ["add_ons", "extra_kitchen", "fries"],
+  extra_drinks:     ["extra_drinks", "extra_drink"],
+  shisha:           ["shisha", "hookah"],
+  soft_drinks:      ["soft_drinks"],
 };
 
 const CAT_ALIAS_SETS: Record<string, Set<string>> = Object.fromEntries(
@@ -862,27 +861,59 @@ export default function MenuLightweight() {
             </p>
           </div>
 
-          {/* Offers & Full menu links */}
-          <div className="flex-shrink-0 z-10 flex flex-col gap-1.5">
-            <a
-              href="/offers"
-              className="px-3 py-1.5 rounded-xl text-white text-[10px] font-bold flex items-center gap-1.5 transition-all hover:scale-105"
-              style={{ background: "linear-gradient(135deg, #f59e0b, #ea580c)", backdropFilter: "blur(6px)" }}
-              title={tr("View Special Offers", "شاهد العروض المميزة")}
-            >
-              <Gift size={12} />
-              <span>{tr("Offers", "العروض")}</span>
-            </a>
+          {/* Social links + actions */}
+          <div className="flex-shrink-0 z-10 flex flex-col gap-1.5 items-end">
+            {/* Social media row */}
+            <div className="flex items-center gap-1.5">
+              <a
+                href="https://instagram.com/azuracafeegy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-7 h-7 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
+                style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}
+                title="Instagram @azuracafeegy"
+                aria-label="Instagram"
+              >
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a
+                href="https://www.tiktok.com/@azuracafee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-7 h-7 rounded-full bg-black flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
+                title="TikTok @azuracafee"
+                aria-label="TikTok"
+              >
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              </a>
+              <a
+                href="https://web.facebook.com/p/Azura-cafe-restaurant-61577762257966"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
+                title="Facebook Azura Cafe"
+                aria-label="Facebook"
+              >
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </a>
+            </div>
+            {/* Full menu link */}
             <a
               href="https://azura-menu.pages.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-xl text-white text-[10px] font-bold flex items-center gap-1.5 transition-colors"
+              className="px-2.5 py-1 rounded-xl text-white text-[9px] font-bold flex items-center gap-1 transition-colors"
               style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
               title={tr("View Full Menu", "القائمة الكاملة")}
             >
               <span>📖</span>
-              <span className="hidden sm:inline">{tr("Full Menu", "القائمة")}</span>
+              <span>{tr("Full Menu", "القائمة")}</span>
             </a>
           </div>
         </div>
