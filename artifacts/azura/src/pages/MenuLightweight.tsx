@@ -4,7 +4,7 @@ import { db, ref, get } from "@/lib/firebase";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { logUserActivity, updateUserCategoryAffinity } from "@/lib/activityTracker";
-import { Search, X, ChevronLeft, ChevronRight, Gift } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight, Gift, Tag, Percent, Clock, Sparkles } from "lucide-react";
 
 interface MenuItem {
   id: string; name: string; nameAr: string;
@@ -14,6 +14,23 @@ interface MenuItem {
   ingredientsAr?: string[];
   recommended?: boolean;
   searchStr?: string;
+}
+
+interface Offer {
+  id: string;
+  title: string;
+  titleAr: string;
+  description: string;
+  descriptionAr: string;
+  image: string;
+  badge?: string;
+  badgeAr?: string;
+  discount?: number;
+  validUntil?: number;
+  active: boolean;
+  order: number;
+  price?: number;
+  originalPrice?: number;
 }
 
 function normalizeItem(id: string, raw: Record<string, unknown>, parentCategory?: string): MenuItem {
@@ -54,8 +71,8 @@ function normalizeItem(id: string, raw: Record<string, unknown>, parentCategory?
 
 // Category order as specified by user
 const CATS = [
-  // Offers - linked to /offers page
-  { id: "offers_link",     emoji: "🎁",  en: "Offers",             ar: "العروض"          },
+  // Offers - Real category managed by admin
+  { id: "offers",          emoji: "🎁",  en: "Offers",             ar: "العروض"          },
   // Main Menu
   { id: "recommended",      emoji: "⭐",  en: "Top Picks",           ar: "الأفضل"          },
   { id: "new_items",         emoji: "🆕",  en: "New Items",           ar: "جديد"            },
@@ -497,6 +514,8 @@ export default function MenuLightweight() {
   const [page, setPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [banners, setBanners] = useState<Record<string, { image: string, titleAr: string, titleEn: string, descAr: string, descEn: string }>>({});
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loadingOffers, setLoadingOffers] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const tr = useCallback((en: string, ar: string) => lang === "ar" ? ar : en, [lang]);
@@ -517,6 +536,37 @@ export default function MenuLightweight() {
       updateUserCategoryAffinity(user.uid, item.category, 8);
     }
   }, [user?.uid]);
+
+  // Fetch offers from Firebase
+  const fetchOffers = useCallback(async () => {
+    setLoadingOffers(true);
+    try {
+      const offersRef = ref(db, "offers");
+      const snap = await get(offersRef);
+      if (snap.exists()) {
+        const data = snap.val() as Record<string, Omit<Offer, "id">>;
+        const loadedOffers = Object.entries(data)
+          .map(([id, o]) => ({ id, ...o }))
+          .filter((o) => o.active)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+        setOffers(loadedOffers);
+      } else {
+        setOffers([]);
+      }
+    } catch (e) {
+      console.error("Failed to fetch offers:", e);
+      setOffers([]);
+    } finally {
+      setLoadingOffers(false);
+    }
+  }, []);
+
+  // Fetch offers when category is "offers"
+  useEffect(() => {
+    if (cat === "offers") {
+      fetchOffers();
+    }
+  }, [cat, fetchOffers]);
 
   // Fetch banners from Firebase RTDB with polling (every 60 seconds instead of real-time)
   useEffect(() => {
@@ -814,16 +864,11 @@ export default function MenuLightweight() {
       <div className="sticky top-[105px] z-20 bg-[#FDF5E6] px-4 py-3 border-b border-[#D2B48C]">
         <div className="flex gap-2.5 overflow-x-auto scroll-hide pb-1 will-change-transform">
           {activeCats.map((c, idx) => {
-            const isOffersLink = c.id === "offers_link";
+            const isOffers = c.id === "offers";
             return (
               <button
                 key={c.id}
                 onClick={() => {
-                  // Handle offers link - navigate to offers page
-                  if (isOffersLink) {
-                    window.location.href = "/offers";
-                    return;
-                  }
                   setCat(c.id);
                   if (search) setSearch(""); // Clear search when switching sections manually
                   if (user?.uid) {
@@ -834,8 +879,10 @@ export default function MenuLightweight() {
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold whitespace-nowrap
                   transition-all duration-300 ease-out shadow-sm
-                  ${isOffersLink 
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 hover:scale-105" 
+                  ${isOffers 
+                    ? cat === c.id 
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 scale-105" 
+                      : "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-lg shadow-amber-500/30 hover:scale-105"
                     : cat === c.id 
                       ? "bg-gradient-to-r from-[#654321] to-[#8B4513] text-white shadow-lg shadow-[#D2B48C] scale-105" 
                       : "bg-white text-[#654321] hover:bg-[#FDF5E6] hover:scale-102"
@@ -843,12 +890,12 @@ export default function MenuLightweight() {
                 `}
                 style={{ 
                   animationDelay: `${idx * 50}ms`,
-                  transform: (cat === c.id || isOffersLink) ? "scale(1.05)" : "scale(1)"
+                  transform: cat === c.id ? "scale(1.05)" : "scale(1)"
                 }}
               >
                 <span className="text-lg">{c.emoji}</span>
                 <span>{lang === "ar" ? c.ar : c.en}</span>
-                {!isOffersLink && (
+                {!isOffers && (
                   <span className={`
                     text-[10px] px-1.5 py-0.5 rounded-full font-bold
                     ${cat === c.id ? "bg-white/20 text-white" : "bg-[#D2B48C] text-[#654321]"}
@@ -864,73 +911,161 @@ export default function MenuLightweight() {
 
       {/* Content */}
       <div className="p-4">
-        {loading ? (
-          <div className="grid grid-cols-2 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden bg-card border border-border/40 shadow-sm animate-pulse">
-                <div className="relative h-36 bg-muted" />
-                <div className="p-3 space-y-2">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : paginated.length === 0 ? (
-          <div className="text-center py-20 flex flex-col items-center">
-            <div className="text-7xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>🔍</div>
-            <p className="text-xl font-bold text-gray-700">{tr("Nothing found", "لا توجد نتائج")}</p>
-            <p className="text-sm text-gray-500 mt-2">{tr("Try a different search", "جرب بحث مختلف")}</p>
-            <button
-              onClick={() => setSearch("")}
-              className="mt-8 px-8 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            >
-              {tr("Clear Search", "مسح البحث")}
-            </button>
-          </div>
-        ) : (
-          /* GRID VIEW WITH SHIMMER */
-          <>
-            {/* Category Hero Header Banner */}
-            {!search && (() => {
-              const hero = banners[cat] || CAT_HERO_IMAGES[cat] || DEFAULT_CAT_HERO;
-              const currentCatObj = CATS.find(c => c.id === cat);
-              return (
-                <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-md mb-6 border border-border/20 group">
-                  <img
-                    src={hero.image}
-                    alt={cat}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">{currentCatObj?.emoji || "🍽️"}</span>
-                      <h2 className="text-base font-black tracking-wide">
-                        {lang === "ar" ? hero.titleAr : hero.titleEn}
-                      </h2>
+        {/* Special Offers Section */}
+        {cat === "offers" && (
+          <div className="mb-6">
+            {loadingOffers ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden bg-card border border-border/40 shadow-sm animate-pulse">
+                    <div className="relative h-48 bg-muted" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-6 bg-muted rounded w-3/4" />
+                      <div className="h-4 bg-muted rounded w-1/2" />
                     </div>
-                    <p className="text-[11px] text-white/80 font-medium line-clamp-2 leading-relaxed">
-                      {lang === "ar" ? hero.descAr : hero.descEn}
-                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : offers.length === 0 ? (
+              <div className="text-center py-20 flex flex-col items-center">
+                <div className="text-7xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>🎁</div>
+                <p className="text-xl font-bold text-gray-700">{tr("No offers available", "لا توجد عروض حالياً")}</p>
+                <p className="text-sm text-gray-500 mt-2">{tr("Check back soon for amazing deals!", "تابعنا للحصول على عروض مميزة!")}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {offers.map((offer, idx) => (
+                  <div 
+                    key={offer.id}
+                    className="relative rounded-2xl overflow-hidden shadow-lg border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    {offer.discount && (
+                      <div className="absolute top-3 right-3 z-10 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                        <Percent size={12} />
+                        -{offer.discount}%
+                      </div>
+                    )}
+                    <div className="relative h-48">
+                      <img
+                        src={offer.image}
+                        alt={lang === "ar" ? offer.titleAr : offer.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      {(offer.badge || offer.badgeAr) && (
+                        <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                          <Sparkles size={12} />
+                          {lang === "ar" ? offer.badgeAr : offer.badge}
+                        </div>
+                      )}
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <h3 className="text-xl font-black mb-1">
+                          {lang === "ar" ? offer.titleAr : offer.title}
+                        </h3>
+                        <p className="text-sm text-white/90 line-clamp-2">
+                          {lang === "ar" ? offer.descriptionAr : offer.description}
+                        </p>
+                        {offer.price !== undefined && offer.originalPrice && offer.originalPrice > offer.price && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-2xl font-black text-green-400">
+                              {offer.price} {tr("EGP", "ج.م")}
+                            </span>
+                            <span className="text-sm text-white/60 line-through">
+                              {offer.originalPrice} {tr("EGP", "ج.م")}
+                            </span>
+                          </div>
+                        )}
+                        {offer.validUntil && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-white/80">
+                            <Clock size={12} />
+                            {tr("Valid until:", "صالح حتى:")} {new Date(offer.validUntil).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-4 flex justify-end">
+                      <button className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95">
+                        {tr("Get Offer", "احصل على العرض")}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Regular Menu Content */}
+        {cat !== "offers" && (
+          loading ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden bg-card border border-border/40 shadow-sm animate-pulse">
+                  <div className="relative h-36 bg-muted" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 bg-muted rounded w-3/4" />
+                    <div className="h-3 bg-muted rounded w-1/2" />
                   </div>
                 </div>
-              );
-            })()}
-
-            <div className="grid grid-cols-2 gap-4">
-              {paginated.map((item, idx) => (
-                <MenuItemCard
-                  key={item.id}
-                  item={item}
-                  lang={lang}
-                  idx={idx}
-                  onClick={handleSelectItem}
-                  CATS={CATS}
-                />
               ))}
             </div>
-          </>
+          ) : paginated.length === 0 ? (
+            <div className="text-center py-20 flex flex-col items-center">
+              <div className="text-7xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>🔍</div>
+              <p className="text-xl font-bold text-gray-700">{tr("Nothing found", "لا توجد نتائج")}</p>
+              <p className="text-sm text-gray-500 mt-2">{tr("Try a different search", "جرب بحث مختلف")}</p>
+              <button
+                onClick={() => setSearch("")}
+                className="mt-8 px-8 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
+              >
+                {tr("Clear Search", "مسح البحث")}
+              </button>
+            </div>
+          ) : (
+            /* GRID VIEW WITH SHIMMER */
+            <>
+              {/* Category Hero Header Banner */}
+              {!search && (() => {
+                const hero = banners[cat] || CAT_HERO_IMAGES[cat] || DEFAULT_CAT_HERO;
+                const currentCatObj = CATS.find(c => c.id === cat);
+                return (
+                  <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-md mb-6 border border-border/20 group">
+                    <img
+                      src={hero.image}
+                      alt={cat}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">{currentCatObj?.emoji || "🍽️"}</span>
+                        <h2 className="text-base font-black tracking-wide">
+                          {lang === "ar" ? hero.titleAr : hero.titleEn}
+                        </h2>
+                      </div>
+                      <p className="text-[11px] text-white/80 font-medium line-clamp-2 leading-relaxed">
+                        {lang === "ar" ? hero.descAr : hero.descEn}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="grid grid-cols-2 gap-4">
+                {paginated.map((item, idx) => (
+                  <MenuItemCard
+                    key={item.id}
+                    item={item}
+                    lang={lang}
+                    idx={idx}
+                    onClick={handleSelectItem}
+                    CATS={CATS}
+                  />
+                ))}
+              </div>
+            </>
+          )
         )}
 
         {/* Pagination */}
