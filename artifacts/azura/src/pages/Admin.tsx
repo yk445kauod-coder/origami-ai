@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
-import { db, ref, onValue, off, update, set, push, remove, get, forceReseedMenu, mergeMenuIngredients } from "@/lib/firebase";
+import { db, ref, onValue, off, update, set, push, remove, get } from "@/lib/firebase";
 import { smartGet, smartSet, smartUpdate, smartRemove, smartPush, getDBMode, setDBMode, onModeChange } from "@/lib/dbWrapper";
 import { useLang } from "@/contexts/LanguageContext";
 import { useLocation } from "wouter";
@@ -609,8 +609,6 @@ const MenuTab = ({ tr, lang, menu, MENU_CATEGORIES, CAT_META }: { tr: any, lang:
             </select>
           </div>
           <div className="flex gap-3 flex-wrap w-full">
-            <button onClick={async () => { if (!confirm(tr("Merge menu?", "دمج القائمة؟"))) return; swalLoading(tr("Merging…", "جار الدمج…")); await mergeMenuIngredients(); swalClose(); swalSuccess(tr("Merged!", "تم الدمج!")); }} className="flex-1 btn-secondary py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"><RotateCcw size={14}/> {tr("Merge", "دمج")}</button>
-            <button onClick={async () => { if (!confirm(tr("⚠️ Reseed entire menu?", "⚠️ إعادة رفع القائمة بالكامل؟"))) return; swalLoading(tr("Reseeding…", "جار الرفع…")); await forceReseedMenu(); swalClose(); swalSuccess(tr("Reseeded!", "تم الرفع!")); }} className="flex-1 btn-secondary py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"><UploadCloud size={14}/> {tr("Reseed", "رفع")}</button>
             <button onClick={() => setShowAddForm(v => !v)} className={`flex-1 ${showAddForm ? "btn-secondary" : "btn-primary"} py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5`}>{showAddForm ? tr("Cancel", "إلغاء") : tr("Add", "إضافة")}</button>
           </div>
         </div>
