@@ -36,15 +36,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Make build script executable
+        run: chmod +x build-cf.sh
+
+      - name: Build and copy dist
+        run: ./build-cf.sh
         env:
           CI: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/azura/dist
+          path: dist
 
   deploy:
     environment:
