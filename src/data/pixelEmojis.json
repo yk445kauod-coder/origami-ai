@@ -1,0 +1,248 @@
+{
+  "name": "Egytronic Pixel Art Emoji Pack",
+  "version": "1.0.0",
+  "author": "Egytronic",
+  "description": "A pixel art style emoji pack for Egytronic Chat - CDN-ready JSON with CSS pixel art representations",
+  "emojis": [
+    {
+      "id": "pixel_smile",
+      "name": "Pixel Smile",
+      "unified": "1F600",
+      "shortcodes": [":)", ":-)", ":smile:"],
+      "category": "faces",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffcc00' x='2' y='2' width='12' height='12'/><rect fill='#1a1a2e' x='4' y='5' width='2' height='2'/><rect fill='#1a1a2e' x='10' y='5' width='2' height='2'/><rect fill='#1a1a2e' x='5' y='10' width='6' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_heart",
+      "name": "Pixel Heart",
+      "unified": "2764",
+      "shortcodes": [":heart:", "<3"],
+      "category": "symbols",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ff1744' x='3' y='4' width='2' height='2'/><rect fill='#ff1744' x='11' y='4' width='2' height='2'/><rect fill='#ff1744' x='2' y='5' width='3' height='2'/><rect fill='#ff1744' x='10' y='5' width='4' height='2'/><rect fill='#ff1744' x='1' y='6' width='4' height='2'/><rect fill='#ff1744' x='10' y='6' width='5' height='2'/><rect fill='#ff1744' x='2' y='7' width='6' height='2'/><rect fill='#ff1744' x='3' y='8' width='5' height='2'/><rect fill='#ff1744' x='4' y='9' width='4' height='2'/><rect fill='#ff1744' x='5' y='10' width='3' height='2'/><rect fill='#ff1744' x='6' y='11' width='2' height='2'/><rect fill='#ff1744' x='7' y='12' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_fire",
+      "name": "Pixel Fire",
+      "unified": "1F525",
+      "shortcodes": [":fire:", ":flame:"],
+      "category": "nature",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ff5722' x='7' y='1' width='2' height='1'/><rect fill='#ff5722' x='5' y='2' width='3' height='1'/><rect fill='#ff5722' x='8' y='2' width='2' height='1'/><rect fill='#ff5722' x='4' y='3' width='2' height='1'/><rect fill='#ffc107' x='6' y='3' width='2' height='1'/><rect fill='#ff5722' x='9' y='3' width='3' height='1'/><rect fill='#ff5722' x='3' y='4' width='2' height='1'/><rect fill='#ffc107' x='5' y='4' width='3' height='1'/><rect fill='#ff5722' x='10' y='4' width='3' height='1'/><rect fill='#ff5722' x='2' y='5' width='3' height='1'/><rect fill='#ffc107' x='5' y='5' width='4' height='1'/><rect fill='#ff5722' x='11' y='5' width='3' height='1'/><rect fill='#ff5722' x='3' y='6' width='2' height='1'/><rect fill='#ffc107' x='5' y='6' width='5' height='1'/><rect fill='#ff5722' x='12' y='6' width='2' height='1'/><rect fill='#ff5722' x='3' y='7' width='3' height='1'/><rect fill='#ffc107' x='6' y='7' width='4' height='1'/><rect fill='#ff5722' x='11' y='7' width='2' height='1'/><rect fill='#ff5722' x='4' y='8' width='3' height='1'/><rect fill='#ffc107' x='7' y='8' width='3' height='1'/><rect fill='#ff5722' x='5' y='9' width='4' height='1'/><rect fill='#ffc107' x='7' y='9' width='2' height='1'/><rect fill='#ff5722' x='6' y='10' width='3' height='1'/><rect fill='#ff5722' x='7' y='11' width='2' height='1'/><rect fill='#ff5722' x='8' y='12' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_star",
+      "name": "Pixel Star",
+      "unified": "2B50",
+      "shortcodes": [":star:", ":*:"],
+      "category": "symbols",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='7' y='0' width='2' height='1'/><rect fill='#ffc107' x='7' y='1' width='2' height='1'/><rect fill='#ffc107' x='4' y='2' width='2' height='1'/><rect fill='#ffc107' x='10' y='2' width='2' height='1'/><rect fill='#ffc107' x='3' y='3' width='2' height='1'/><rect fill='#ffc107' x='11' y='3' width='2' height='1'/><rect fill='#ffc107' x='2' y='4' width='12' height='2'/><rect fill='#ffc107' x='4' y='6' width='8' height='2'/><rect fill='#ffc107' x='5' y='8' width='6' height='2'/><rect fill='#ffc107' x='6' y='10' width='4' height='2'/><rect fill='#ffc107' x='7' y='12' width='2' height='2'/><rect fill='#ffc107' x='8' y='14' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_rocket",
+      "name": "Pixel Rocket",
+      "unified": "1F680",
+      "shortcodes": [":rocket:"],
+      "category": "travel",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#e0e0e0' x='7' y='0' width='2' height='1'/><rect fill='#e0e0e0' x='6' y='1' width='4' height='1'/><rect fill='#e0e0e0' x='5' y='2' width='6' height='1'/><rect fill='#2196f3' x='6' y='3' width='4' height='2'/><rect fill='#e0e0e0' x='4' y='5' width='8' height='2'/><rect fill='#ff5722' x='2' y='6' width='2' height='2'/><rect fill='#ff5722' x='12' y='6' width='2' height='2'/><rect fill='#e0e0e0' x='5' y='7' width='6' height='2'/><rect fill='#ff5722' x='6' y='9' width='4' height='3'/><rect fill='#ffc107' x='7' y='12' width='2' height='2'/><rect fill='#ffc107' x='6' y='14' width='1' height='1'/><rect fill='#ffc107' x='9' y='14' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_gem",
+      "name": "Pixel Gem",
+      "unified": "1F48E",
+      "shortcodes": [":gem:", ":diamond:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#00bcd4' x='6' y='0' width='4' height='1'/><rect fill='#00bcd4' x='4' y='1' width='8' height='1'/><rect fill='#00acc1' x='3' y='2' width='10' height='1'/><rect fill='#00acc1' x='2' y='3' width='12' height='1'/><rect fill='#00acc1' x='2' y='4' width='12' height='2'/><rect fill='#0097a7' x='3' y='6' width='10' height='2'/><rect fill='#0097a7' x='4' y='8' width='8' height='2'/><rect fill='#0097a7' x='5' y='10' width='6' height='2'/><rect fill='#0097a7' x='6' y='12' width='4' height='2'/><rect fill='#0097a7' x='7' y='14' width='2' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_crown",
+      "name": "Pixel Crown",
+      "unified": "1F451",
+      "shortcodes": [":crown:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='3' y='2' width='2' height='2'/><rect fill='#ffc107' x='7' y='1' width='2' height='3'/><rect fill='#ffc107' x='11' y='2' width='2' height='2'/><rect fill='#ffc107' x='2' y='4' width='12' height='2'/><rect fill='#ffc107' x='1' y='6' width='14' height='2'/><rect fill='#ffeb3b' x='2' y='8' width='12' height='2'/><rect fill='#ffeb3b' x='3' y='10' width='10' height='2'/><rect fill='#ffeb3b' x='4' y='12' width='8' height='2'/><rect fill='#e91e63' x='5' y='4' width='2' height='2'/><rect fill='#e91e63' x='9' y='4' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_lightning",
+      "name": "Pixel Lightning",
+      "unified": "26A1",
+      "shortcodes": [":zap:", ":lightning:"],
+      "category": "nature",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='9' y='0' width='2' height='1'/><rect fill='#ffc107' x='8' y='1' width='2' height='1'/><rect fill='#ffc107' x='9' y='2' width='2' height='1'/><rect fill='#ffc107' x='10' y='3' width='2' height='1'/><rect fill='#ffc107' x='6' y='4' width='6' height='1'/><rect fill='#ffc107' x='5' y='5' width='6' height='1'/><rect fill='#ffc107' x='5' y='6' width='5' height='1'/><rect fill='#ffc107' x='4' y='7' width='5' height='1'/><rect fill='#ffc107' x='4' y='8' width='4' height='1'/><rect fill='#ffc107' x='3' y='9' width='4' height='1'/><rect fill='#ffc107' x='3' y='10' width='3' height='1'/><rect fill='#ffc107' x='2' y='11' width='3' height='1'/><rect fill='#ffc107' x='2' y='12' width='2' height='1'/><rect fill='#ffc107' x='2' y='13' width='1' height='1'/><rect fill='#ffc107' x='1' y='14' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_trophy",
+      "name": "Pixel Trophy",
+      "unified": "1F3C6",
+      "shortcodes": [":trophy:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='5' y='1' width='6' height='1'/><rect fill='#ffc107' x='4' y='2' width='8' height='1'/><rect fill='#ffc107' x='4' y='3' width='8' height='2'/><rect fill='#ffc107' x='3' y='5' width='10' height='2'/><rect fill='#ffc107' x='3' y='7' width='10' height='3'/><rect fill='#ffc107' x='4' y='10' width='8' height='2'/><rect fill='#ffc107' x='5' y='12' width='6' height='1'/><rect fill='#ffc107' x='6' y='13' width='4' height='2'/><rect fill='#ffc107' x='7' y='15' width='2' height='1'/><rect fill='#ffc107' x='2' y='6' width='1' height='2'/><rect fill='#ffc107' x='13' y='6' width='1' height='2'/><rect fill='#e91e63' x='6' y='6' width='4' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_skull",
+      "name": "Pixel Skull",
+      "unified": "1F480",
+      "shortcodes": [":skull:"],
+      "category": "faces",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#f5f5f5' x='4' y='1' width='8' height='1'/><rect fill='#f5f5f5' x='3' y='2' width='10' height='2'/><rect fill='#f5f5f5' x='2' y='3' width='12' height='2'/><rect fill='#1a1a2e' x='4' y='4' width='2' height='3'/><rect fill='#f5f5f5' x='6' y='4' width='4' height='1'/><rect fill='#1a1a2e' x='10' y='4' width='2' height='3'/><rect fill='#f5f5f5' x='2' y='5' width='12' height='2'/><rect fill='#f5f5f5' x='3' y='7' width='10' height='3'/><rect fill='#f5f5f5' x='5' y='10' width='2' height='2'/><rect fill='#f5f5f5' x='9' y='10' width='2' height='2'/><rect fill='#f5f5f5' x='5' y='12' width='2' height='2'/><rect fill='#f5f5f5' x='7' y='12' width='2' height='2'/><rect fill='#f5f5f5' x='9' y='12' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_ghost",
+      "name": "Pixel Ghost",
+      "unified": "1F47B",
+      "shortcodes": [":ghost:"],
+      "category": "faces",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#f5f5f5' x='4' y='0' width='8' height='1'/><rect fill='#f5f5f5' x='3' y='1' width='10' height='1'/><rect fill='#f5f5f5' x='2' y='2' width='12' height='1'/><rect fill='#f5f5f5' x='2' y='3' width='12' height='2'/><rect fill='#1a1a2e' x='4' y='4' width='2' height='2'/><rect fill='#1a1a2e' x='10' y='4' width='2' height='2'/><rect fill='#f5f5f5' x='2' y='5' width='12' height='3'/><rect fill='#f5f5f5' x='2' y='8' width='12' height='2'/><rect fill='#f5f5f5' x='2' y='10' width='3' height='2'/><rect fill='#f5f5f5' x='7' y='10' width='2' height='2'/><rect fill='#f5f5f5' x='11' y='10' width='3' height='2'/><rect fill='#f5f5f5' x='2' y='12' width='3' height='2'/><rect fill='#f5f5f5' x='7' y='12' width='2' height='2'/><rect fill='#f5f5f5' x='11' y='12' width='3' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_robot",
+      "name": "Pixel Robot",
+      "unified": "1F916",
+      "shortcodes": [":robot:", ":bot:"],
+      "category": "faces",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#607d8b' x='5' y='0' width='6' height='1'/><rect fill='#607d8b' x='4' y='1' width='8' height='1'/><rect fill='#607d8b' x='3' y='2' width='10' height='2'/><rect fill='#607d8b' x='2' y='4' width='12' height='2'/><rect fill='#00e5ff' x='4' y='5' width='2' height='1'/><rect fill='#00e5ff' x='10' y='5' width='2' height='1'/><rect fill='#607d8b' x='3' y='6' width='10' height='2'/><rect fill='#607d8b' x='4' y='8' width='8' height='2'/><rect fill='#ff5722' x='6' y='9' width='4' height='1'/><rect fill='#607d8b' x='6' y='10' width='4' height='2'/><rect fill='#607d8b' x='3' y='12' width='2' height='2'/><rect fill='#607d8b' x='11' y='12' width='2' height='2'/><rect fill='#607d8b' x='5' y='14' width='2' height='1'/><rect fill='#607d8b' x='9' y='14' width='2' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_egg",
+      "name": "Pixel Easter Egg",
+      "unified": "1F95B",
+      "shortcodes": [":egg:"],
+      "category": "food",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#f5f5f5' x='6' y='0' width='4' height='1'/><rect fill='#f5f5f5' x='5' y='1' width='6' height='1'/><rect fill='#f5f5f5' x='4' y='2' width='8' height='1'/><rect fill='#f5f5f5' x='3' y='3' width='10' height='2'/><rect fill='#f5f5f5' x='2' y='5' width='12' height='3'/><rect fill='#e91e63' x='4' y='6' width='2' height='2'/><rect fill='#2196f3' x='8' y='6' width='2' height='2'/><rect fill='#4caf50' x='6' y='8' width='2' height='2'/><rect fill='#f5f5f5' x='2' y='8' width='12' height='3'/><rect fill='#f5f5f5' x='3' y='11' width='10' height='2'/><rect fill='#f5f5f5' x='4' y='13' width='8' height='2'/><rect fill='#f5f5f5' x='5' y='15' width='6' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_sword",
+      "name": "Pixel Sword",
+      "unified": "1F5E1",
+      "shortcodes": [":sword:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#90a4ae' x='7' y='0' width='2' height='8'/><rect fill='#90a4ae' x='6' y='8' width='4' height='1'/><rect fill='#ffc107' x='5' y='9' width='6' height='2'/><rect fill='#8d6e63' x='6' y='11' width='4' height='4'/><rect fill='#795548' x='5' y='15' width='6' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_shield",
+      "name": "Pixel Shield",
+      "unified": "1F6E1",
+      "shortcodes": [":shield:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#2196f3' x='6' y='0' width='4' height='1'/><rect fill='#2196f3' x='5' y='1' width='6' height='1'/><rect fill='#2196f3' x='4' y='2' width='8' height='1'/><rect fill='#2196f3' x='3' y='3' width='10' height='2'/><rect fill='#2196f3' x='2' y='5' width='12' height='2'/><rect fill='#2196f3' x='2' y='7' width='12' height='3'/><rect fill='#1976d2' x='3' y='10' width='10' height='2'/><rect fill='#1976d2' x='4' y='12' width='8' height='2'/><rect fill='#1976d2' x='5' y='14' width='6' height='1'/><rect fill='#ffc107' x='7' y='7' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_bomb",
+      "name": "Pixel Bomb",
+      "unified": "1F4A3",
+      "shortcodes": [":bomb:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#1a1a2e' x='5' y='4' width='6' height='1'/><rect fill='#1a1a2e' x='4' y='5' width='2' height='1'/><rect fill='#1a1a2e' x='3' y='6' width='2' height='1'/><rect fill='#1a1a2e' x='2' y='7' width='2' height='1'/><rect fill='#1a1a2e' x='4' y='6' width='8' height='6'/><rect fill='#1a1a2e' x='5' y='7' width='6' height='4'/><rect fill='#ffc107' x='6' y='3' width='1' height='1'/><rect fill='#ff5722' x='7' y='2' width='1' height='1'/><rect fill='#ff5722' x='6' y='1' width='1' height='1'/><rect fill='#ff5722' x='8' y='1' width='1' height='1'/><rect fill='#ffc107' x='8' y='0' width='1' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_coffee",
+      "name": "Pixel Coffee",
+      "unified": "2615",
+      "shortcodes": [":coffee:"],
+      "category": "food",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#795548' x='4' y='3' width='8' height='10'/><rect fill='#5d4037' x='5' y='4' width='6' height='8'/><rect fill='#8d6e63' x='12' y='5' width='2' height='6'/><rect fill='#8d6e63' x='13' y='6' width='1' height='4'/><rect fill='#ffffff' x='5' y='5' width='1' height='1'/><rect fill='#ffffff' x='6' y='6' width='1' height='1'/><rect fill='#795548' x='6' y='1' width='1' height='2'/><rect fill='#795548' x='8' y='0' width='1' height='3'/><rect fill='#795548' x='10' y='1' width='1' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_pizza",
+      "name": "Pixel Pizza",
+      "unified": "1F355",
+      "shortcodes": [":pizza:"],
+      "category": "food",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='7' y='0' width='2' height='1'/><rect fill='#ffc107' x='6' y='1' width='4' height='1'/><rect fill='#ffc107' x='4' y='2' width='8' height='1'/><rect fill='#ff5722' x='3' y='3' width='10' height='2'/><rect fill='#ff5722' x='2' y='4' width='12' height='2'/><rect fill='#ff5722' x='2' y='5' width='12' height='2'/><rect fill='#f44336' x='4' y='4' width='2' height='2'/><rect fill='#f44336' x='8' y='5' width='2' height='2'/><rect fill='#4caf50' x='6' y='6' width='2' height='1'/><rect fill='#4caf50' x='10' y='4' width='2' height='1'/><rect fill='#ffc107' x='2' y='6' width='12' height='1'/><rect fill='#ffc107' x='1' y='7' width='14' height='1'/><rect fill='#5d4037' x='0' y='8' width='16' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_dragon",
+      "name": "Pixel Dragon",
+      "unified": "1F409",
+      "shortcodes": [":dragon:"],
+      "category": "nature",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#4caf50' x='3' y='2' width='2' height='1'/><rect fill='#4caf50' x='2' y='3' width='2' height='1'/><rect fill='#4caf50' x='3' y='3' width='8' height='3'/><rect fill='#4caf50' x='11' y='2' width='2' height='1'/><rect fill='#4caf50' x='12' y='3' width='2' height='1'/><rect fill='#1a1a2e' x='4' y='3' width='2' height='2'/><rect fill='#1a1a2e' x='8' y='3' width='2' height='2'/><rect fill='#e91e63' x='5' y='4' width='1' height='1'/><rect fill='#e91e63' x='9' y='4' width='1' height='1'/><rect fill='#4caf50' x='2' y='6' width='12' height='4'/><rect fill='#4caf50' x='0' y='7' width='2' height='2'/><rect fill='#4caf50' x='14' y='7' width='2' height='2'/><rect fill='#4caf50' x='1' y='8' width='2' height='2'/><rect fill='#4caf50' x='13' y='8' width='2' height='2'/><rect fill='#4caf50' x='4' y='10' width='8' height='3'/><rect fill='#4caf50' x='5' y='13' width='2' height='2'/><rect fill='#4caf50' x='9' y='13' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_unicorn",
+      "name": "Pixel Unicorn",
+      "unified": "1F984",
+      "shortcodes": [":unicorn:"],
+      "category": "nature",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='7' y='0' width='2' height='4'/><rect fill='#e91e63' x='7' y='0' width='2' height='1'/><rect fill='#ffc107' x='7' y='1' width='2' height='1'/><rect fill='#e91e63' x='7' y='2' width='2' height='1'/><rect fill='#ffc107' x='7' y='3' width='2' height='1'/><rect fill='#f5f5f5' x='4' y='4' width='8' height='1'/><rect fill='#f5f5f5' x='3' y='5' width='10' height='2'/><rect fill='#1a1a2e' x='5' y='5' width='2' height='2'/><rect fill='#1a1a2e' x='9' y='5' width='2' height='2'/><rect fill='#e91e63' x='6' y='6' width='1' height='1'/><rect fill='#e91e63' x='10' y='6' width='1' height='1'/><rect fill='#f5f5f5' x='2' y='7' width='12' height='4'/><rect fill='#e91e63' x='4' y='8' width='2' height='2'/><rect fill='#2196f3' x='8' y='8' width='2' height='2'/><rect fill='#4caf50' x='6' y='11' width='4' height='2'/><rect fill='#f5f5f5' x='4' y='11' width='2' height='2'/><rect fill='#f5f5f5' x='10' y='11' width='2' height='2'/><rect fill='#8d6e63' x='5' y='13' width='2' height='2'/><rect fill='#8d6e63' x='9' y='13' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_alien",
+      "name": "Pixel Alien",
+      "unified": "1F47D",
+      "shortcodes": [":alien:"],
+      "category": "faces",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#4caf50' x='5' y='2' width='6' height='1'/><rect fill='#4caf50' x='4' y='3' width='8' height='1'/><rect fill='#4caf50' x='3' y='4' width='10' height='2'/><rect fill='#1a1a2e' x='4' y='5' width='3' height='2'/><rect fill='#1a1a2e' x='9' y='5' width='3' height='2'/><rect fill='#4caf50' x='2' y='6' width='12' height='4'/><rect fill='#1a1a2e' x='5' y='6' width='1' height='1'/><rect fill='#1a1a2e' x='10' y='6' width='1' height='1'/><rect fill='#4caf50' x='3' y='10' width='10' height='2'/><rect fill='#4caf50' x='4' y='12' width='8' height='2'/><rect fill='#4caf50' x='5' y='14' width='6' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_crystal",
+      "name": "Pixel Crystal",
+      "unified": "1F48A",
+      "shortcodes": [":crystal:", ":pill:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#e1bee7' x='5' y='1' width='6' height='1'/><rect fill='#9c27b0' x='4' y='2' width='8' height='1'/><rect fill='#9c27b0' x='4' y='3' width='8' height='1'/><rect fill='#9c27b0' x='4' y='4' width='8' height='1'/><rect fill='#e1bee7' x='5' y='5' width='6' height='1'/><rect fill='#9c27b0' x='5' y='6' width='6' height='1'/><rect fill='#9c27b0' x='5' y='7' width='6' height='1'/><rect fill='#9c27b0' x='5' y='8' width='6' height='1'/><rect fill='#e1bee7' x='5' y='9' width='6' height='1'/><rect fill='#9c27b0' x='5' y='10' width='6' height='2'/><rect fill='#e1bee7' x='6' y='12' width='4' height='1'/><rect fill='#e1bee7' x='7' y='13' width='2' height='2'/><rect fill='#7b1fa2' x='5' y='2' width='2' height='1'/><rect fill='#7b1fa2' x='7' y='5' width='2' height='2'/><rect fill='#7b1fa2' x='6' y='9' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_key",
+      "name": "Pixel Key",
+      "unified": "1F511",
+      "shortcodes": [":key:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#ffc107' x='6' y='2' width='4' height='4'/><rect fill='#ffc107' x='7' y='3' width='2' height='2'/><rect fill='#ffc107' x='8' y='6' width='2' height='6'/><rect fill='#ffc107' x='10' y='9' width='3' height='2'/><rect fill='#ffc107' x='8' y='12' width='2' height='2'/><rect fill='#ffc107' x='10' y='13' width='2' height='2'/><rect fill='#ffc107' x='6' y='6' width='2' height='2'/><rect fill='#ffc107' x='4' y='3' width='2' height='2'/></svg>"
+    },
+    {
+      "id": "pixel_telescope",
+      "name": "Pixel Telescope",
+      "unified": "1F52D",
+      "shortcodes": [":telescope:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#607d8b' x='0' y='4' width='8' height='4'/><rect fill='#90a4ae' x='1' y='5' width='6' height='2'/><rect fill='#455a64' x='8' y='3' width='6' height='3'/><rect fill='#455a64' x='14' y='2' width='2' height='5'/><rect fill='#455a64' x='6' y='8' width='8' height='2'/><rect fill='#8d6e63' x='7' y='10' width='2' height='4'/><rect fill='#8d6e63' x='5' y='13' width='6' height='2'/><rect fill='#455a64' x='9' y='4' width='2' height='1'/></svg>"
+    },
+    {
+      "id": "pixel_gamepad",
+      "name": "Pixel Gamepad",
+      "unified": "1F3AE",
+      "shortcodes": [":gamepad:"],
+      "category": "objects",
+      "svg": "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><rect fill='#424242' x='2' y='5' width='12' height='6'/><rect fill='#616161' x='3' y='6' width='10' height='4'/><rect fill='#1a1a2e' x='4' y='4' width='2' height='1'/><rect fill='#1a1a2e' x='4' y='11' width='2' height='1'/><rect fill='#f44336' x='10' y='6' width='2' height='2'/><rect fill='#2196f3' x='8' y='8' width='1' height='1'/><rect fill='#ffc107' x='10' y='8' width='1' height='1'/><rect fill='#4caf50' x='9' y='7' width='1' height='1'/></svg>"
+    }
+  ],
+  "categories": [
+    {
+      "id": "faces",
+      "name": "Faces & Characters",
+      "icon": "😀"
+    },
+    {
+      "id": "symbols",
+      "name": "Symbols & Shapes",
+      "icon": "❤️"
+    },
+    {
+      "id": "nature",
+      "name": "Nature & Animals",
+      "icon": "🔥"
+    },
+    {
+      "id": "travel",
+      "name": "Travel & Places",
+      "icon": "🚀"
+    },
+    {
+      "id": "objects",
+      "name": "Objects & Things",
+      "icon": "💎"
+    },
+    {
+      "id": "food",
+      "name": "Food & Drinks",
+      "icon": "☕"
+    }
+  ],
+  "metadata": {
+    "generatedAt": "2025-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "license": "MIT",
+    "author": "Egytronic",
+    "website": "https://egytronic.pages.dev",
+    "appUrl": "https://3000445.pages.dev"
+  }
+}

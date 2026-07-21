@@ -1,0 +1,1045 @@
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
+import { useLocation } from "wouter";
+import { db, ref, get } from "@/lib/firebase";
+import { useLang } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { logUserActivity, updateUserCategoryAffinity } from "@/lib/activityTracker";
+import { Search, X, ChevronLeft, ChevronRight, Gift } from "lucide-react";
+
+interface MenuItem {
+  id: string; name: string; nameAr: string;
+  description: string; descriptionAr: string;
+  price: number; category: string; available: boolean; image: string;
+  ingredients?: string[];
+  ingredientsAr?: string[];
+  recommended?: boolean;
+  searchStr?: string;
+}
+
+function normalizeItem(id: string, raw: Record<string, unknown>, parentCategory?: string): MenuItem {
+  const name = String(raw.name || raw.nameEn || raw.title || "");
+  const nameAr = String(raw.nameAr || raw.titleAr || "");
+  const description = String(raw.description || raw.descEn || raw.desc || "");
+  const descriptionAr = String(raw.descriptionAr || raw.descAr || "");
+  const category = String(parentCategory || raw.category || "food").toLowerCase().trim();
+  const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients as string[] : (typeof raw.ingredients === "string" ? raw.ingredients.split(",").map(i => i.trim()) : []);
+  const ingredientsAr = Array.isArray(raw.ingredientsAr) ? raw.ingredientsAr as string[] : (typeof raw.ingredientsAr === "string" ? raw.ingredientsAr.split("،").map(i => i.trim()) : []);
+
+  const searchStr = normalizeText([
+    name,
+    nameAr,
+    description,
+    descriptionAr,
+    category,
+    ...ingredients,
+    ...ingredientsAr
+  ].join(" "));
+
+  return {
+    id,
+    name,
+    nameAr,
+    description,
+    descriptionAr,
+    price: Number(raw.price) || 0,
+    category,
+    available: raw.available !== false,
+    image: String(raw.image || raw.img || ""),
+    recommended: raw.recommended === true,
+    ingredients,
+    ingredientsAr,
+    searchStr,
+  };
+}
+
+// Category order as specified by user
+const CATS = [
+  // Offers - linked to /offers page
+  { id: "offers_link",     emoji: "🎁",  en: "Offers",             ar: "العروض"          },
+  // Main Menu
+  { id: "recommended",      emoji: "⭐",  en: "Top Picks",           ar: "الأفضل"          },
+  { id: "new_items",         emoji: "🆕",  en: "New Items",           ar: "جديد"            },
+  { id: "breakfast",        emoji: "🍳",  en: "Breakfast",           ar: "إفطار"           },
+  { id: "toast",            emoji: "🥪",  en: "Toast",               ar: "توست"            },
+  { id: "croissant",        emoji: "🥐",  en: "Croissant",           ar: "كرواسون"         },
+  { id: "soups",            emoji: "🍲",  en: "Soup",                ar: "شوربة"           },
+  { id: "appetizers",       emoji: "🍢",  en: "Appetizers",         ar: "مقبلات"          },
+  { id: "salads",           emoji: "🥗",  en: "Salads",              ar: "سلطات"           },
+  { id: "pasta",            emoji: "🍝",  en: "Pasta",               ar: "مكرونة"          },
+  { id: "tortilla",         emoji: "🌯",  en: "Tortilla Sandwiches",ar: "تورتيلا ساندوتش"  },
+  { id: "toast_sandwiches", emoji: "🥪",  en: "Vina Sandwiches",    ar: "ساندوتشات فينا"   },
+  { id: "main_dishes",      emoji: "🍽️",  en: "Main Dishes",         ar: "أطباق رئيسية"     },
+  { id: "burgers",          emoji: "🍔",  en: "Beef Burgers",         ar: "برجر لحم"        },
+  { id: "smash_burgers",    emoji: "🔥",  en: "Smash Burgers",       ar: "سماش برجر"       },
+  { id: "fried_chicken",    emoji: "🍗",  en: "Fried Chicken",      ar: "فراخ مقلية"      },
+  { id: "add_ons",          emoji: "➕",  en: "Extra Kitchen",        ar: "إضافات مطبخ"     },
+  
+  // Barista Section
+  { id: "hot_drinks",       emoji: "☕",  en: "Hot Drinks",          ar: "مشروبات ساخنة"   },
+  { id: "coffee",           emoji: "☕",  en: "Espresso (S)",        ar: "إسبريسو"         },
+  { id: "corto",            emoji: "🥛",  en: "Corto",               ar: "كورتو"           },
+  { id: "hot_chocolate",    emoji: "🍫",  en: "Hot Chocolate",       ar: "شوكولاتة ساخنة"  },
+  { id: "sahlab",           emoji: "🥛",  en: "Sahlab",              ar: "سحلب"            },
+  { id: "frappuccino",      emoji: "🧊",  en: "Frappe",              ar: "فرابتشينو"       },
+  { id: "iced_coffee",      emoji: "🧋",  en: "Ice Cubes",           ar: "مكعبات ثلج"      },
+  { id: "mojitos",          emoji: "🍹",  en: "Mojitos",             ar: "موجيتو"          },
+  { id: "mocktails",        emoji: "🍸",  en: "Mocktails",           ar: "موكتيل"          },
+  { id: "boba_tea",         emoji: "🧋",  en: "Boba Tea",            ar: "بوبا تي"         },
+  { id: "fresh_juices",     emoji: "🍊",  en: "Fresh Juices",        ar: "عصائر طازجة"     },
+  { id: "cocktails",        emoji: "🍹",  en: "Cocktails",           ar: "كوكتيل"          },
+  { id: "smoothies",        emoji: "🥤",  en: "Smoothie",            ar: "سموذي"           },
+  { id: "milkshakes",       emoji: "🥛",  en: "Milkshake",           ar: "ميلك شيك"        },
+  { id: "waffle",           emoji: "🧇",  en: "Waffle",               ar: "وافل"            },
+  { id: "desserts",         emoji: "🍰",  en: "Desserts",             ar: "حلويات"          },
+  { id: "crepes",           emoji: "🥞",  en: "Crepe",                ar: "كريب"            },
+  { id: "mini_pancakes",    emoji: "🥞",  en: "Mini Pancakes",        ar: "بان كيك مصغر"    },
+  { id: "pancakes",         emoji: "🥞",  en: "Pancakes",             ar: "بان كيك"         },
+  { id: "extra_drinks",     emoji: "🥤",  en: "Extra Drinks",          ar: "مشروبات إضافية"  },
+  { id: "soft_drinks",      emoji: "🥤",  en: "Soft Drinks",          ar: "مشروبات غازية"   },
+  { id: "shisha",           emoji: "💨",  en: "Hookah",               ar: "شيشة"            },
+  { id: "all",              emoji: "✨",  en: "All",                  ar: "الكل"            },
+];
+
+const CAT_ALIASES: Record<string, string[]> = {
+  recommended:     ["recommended"],
+  new_items:       ["new_items"],
+  appetizers:      ["appetizers", "appetizer"],
+  soups:           ["soups", "soup"],
+  salads:          ["salads", "salad"],
+  pasta:           ["pasta"],
+  tortilla:        ["tortilla"],
+  toast_sandwiches: ["toast_sandwiches", "vina_sandwiches", "sandwiches"],
+  toast:           ["toast"],
+  croissant:       ["croissant"],
+  breakfast:       ["breakfast"],
+  main_dishes:     ["main_dishes"],
+  burgers:         ["burgers", "burger", "beef_burgers"],
+  smash_burgers:   ["smash_burgers"],
+  fried_chicken:   ["fried_chicken"],
+  hot_drinks:      ["hot_drinks", "hot_drink"],
+  coffee:          ["coffee", "espresso", "espresso_s"],
+  corto:           ["corto"],
+  hot_chocolate:   ["hot_chocolate"],
+  sahlab:          ["sahlab"],
+  frappuccino:     ["frappuccino", "frappe"],
+  iced_coffee:     ["iced_coffee", "iced_drinks", "ice_cubes"],
+  mojitos:         ["mojitos", "mojito"],
+  mocktails:       ["mocktails", "mocktail"],
+  cocktails:       ["cocktails", "cocktail"],
+  boba_tea:        ["boba_tea"],
+  fresh_juices:    ["fresh_juices", "fresh_juice"],
+  smoothies:       ["smoothies", "smoothie"],
+  milkshakes:      ["milkshakes", "milkshake"],
+  waffle:          ["waffle"],
+  desserts:        ["desserts", "dessert"],
+  crepes:          ["crepes", "crepe"],
+  mini_pancakes:   ["mini_pancakes", "mini_pancake"],
+  pancakes:        ["pancakes"],
+  add_ons:         ["add_ons", "extra_kitchen", "fries"],
+  extra_drinks:    ["extra_drinks", "extra_drink"],
+  shisha:          ["shisha", "hookah"],
+  soft_drinks:     ["soft_drinks"],
+};
+
+const CAT_ALIAS_SETS: Record<string, Set<string>> = Object.fromEntries(
+  Object.entries(CAT_ALIASES).map(([k, v]) => [k, new Set(v)])
+);
+
+// Advanced Search Normalization & Synonyms
+const normalizeText = (text: string) => {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[\u064B-\u065F]/g, "") // Remove Harakat
+    .trim();
+};
+
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  "قهوه": ["كوفي", "coffee", "اسبريسو", "لاتيه", "بون", "تركي", "turkish"],
+  "كوفي": ["قهوه", "coffee", "تركي", "turkish"],
+  "شاي": ["tea", "t-shai"],
+  "بطاطس": ["fries", "potato", "فرنش فرايز", "صوابع", "فرايز"],
+  "فراخ": ["chicken", "تشيكن", "دجاج", "فرايد"],
+  "لحمه": ["beef", "بقر", "برجر", "meat"],
+  "بيبسي": ["سودا", "soda", "مشروب غازي", "cola", "كولا", "بارد", "cold"],
+  "مياه": ["وتر", "water", "مايه", "معدنية"],
+  "حلو": ["dessert", "حلويات", "سويت", "كيك", "وافل"],
+  "شيشه": ["hookah", "دخان", "معسل", "فحم"],
+  "مكرونه": ["pasta", "باستا", "نودلز", "مكرونة"],
+  "عصير": ["juice", "فرش", "fresh", "عصاير"],
+  "موهيتو": ["موجيتو", "mojito"],
+  "كوكتيل": ["موكتيل", "mocktail", "cocktail"],
+};
+
+const NORMALIZED_SYNONYMS = Object.entries(SEARCH_SYNONYMS).map(([key, synonyms]) => ({
+  key: normalizeText(key),
+  synonyms: synonyms.map(s => normalizeText(s))
+}));
+
+const CAT_HERO_IMAGES: Record<string, { image: string, titleAr: string, titleEn: string, descAr: string, descEn: string }> = {
+  "new_items": {
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+    titleEn: "Top Picks & Featured Dishes",
+    titleAr: "أطباقنا المميزة والموصى بها",
+    descEn: "Chef's curated selection of delightful meals and drinks",
+    descAr: "تشكيلة مختارة بعناية من أشهى أطباقنا ومشروباتنا"
+  },
+  "breakfast": {
+    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
+    titleEn: "Premium Breakfast Spread",
+    titleAr: "ركن الفطور الفاخر",
+    descEn: "Start your day with our nutritious and delicious breakfast choices",
+    descAr: "ابدأ يومك بنشاط وحيوية مع وجبات الفطور الطازجة والشهية"
+  },
+  "croissant": {
+    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&q=80",
+    titleEn: "Fresh Baked Croissants",
+    titleAr: "مخبوزات الكرواسون الطازجة",
+    descEn: "Flaky, buttery, and baked fresh daily with your favorite fillings",
+    descAr: "كرواسون مقرمش وهش بالزبدة، يُخبز طازجاً يومياً بحشواتك المفضلة"
+  },
+  "soft_drinks": {
+    image: "https://images.unsplash.com/photo-1629203851022-36c64237d951?w=800&q=80",
+    titleEn: "Chilled Soda & Cans",
+    titleAr: "المشروبات الغازية المنعشة",
+    descEn: "Stay refreshed with our select chilled soft drinks and beverages",
+    descAr: "انتعش مع تشكيلة من المشروبات الغازية الباردة"
+  },
+  "coffee": {
+    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
+    titleEn: "Specialty Espresso & Coffee",
+    titleAr: "ركن القهوة المختصة والاسبريسو",
+    descEn: "Rich, aromatic, and brewed to perfection from premium Arabica beans",
+    descAr: "قهوة غنية وعطرية مُعدة من أجود حبوب البن الفاخرة"
+  },
+  "smoothies": {
+    image: "https://images.unsplash.com/photo-1505252585441-ca40d922998a?w=800&q=80",
+    titleEn: "Fresh Fruit Smoothies",
+    titleAr: "سموزي الفواكه الطبيعية",
+    descEn: "Creamy, naturally sweet, and blended with real delicious fruits",
+    descAr: "مشروبات سموزي طبيعية وباردة مخفوقة بالفواكه الطازجة"
+  },
+  "mocktails": {
+    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=800&q=80",
+    titleEn: "Signature Mocktails & Drinks",
+    titleAr: "موكتيلات وأكواب منعشة",
+    descEn: "Expertly mixed non-alcoholic signature creations",
+    descAr: "مشروبات وموكتيلات مبتكرة ومنعشة لتعديل مزاجك"
+  },
+  "appetizers": {
+    image: "https://images.unsplash.com/photo-1573821663912-6df460f9c684?w=800&q=80",
+    titleEn: "Starters & Appetizers",
+    titleAr: "المقبلات والمشهيات",
+    descEn: "Perfect platters and bites to share with friends and family",
+    descAr: "أطباق مقبلات ووجبات خفيفة مثالية للمشاركة"
+  },
+  "burgers": {
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
+    titleEn: "Juicy Beef Burgers",
+    titleAr: "برجر اللحم المشوي",
+    descEn: "Premium beef patties grilled with fresh toppings and specialty sauces",
+    descAr: "برجر لحم فاخر مشوي على اللهب مع خضروات طازجة وصوصات خاصة"
+  },
+  "pasta": {
+    image: "https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=800&q=80",
+    titleEn: "Gourmet Italian Pasta",
+    titleAr: "الباستا والمعكرونة الإيطالية",
+    descEn: "Fresh penne and spaghetti tossed in creamy and savory rich sauces",
+    descAr: "باستا إيطالية أصيلة بصوصات كريمية وطماطم غنية بالبارميزان"
+  },
+  "desserts": {
+    image: "https://images.unsplash.com/photo-1551024601-bec78acc704b?w=800&q=80",
+    titleEn: "Heavenly Desserts & Cakes",
+    titleAr: "الحلويات والكيك الفاخر",
+    descEn: "Indulge in our exquisite sweet creations and warm baked cakes",
+    descAr: "دلل نفسك مع تشكيلتنا الرائعة من الكيك والحلويات اللذيذة"
+  }
+};
+
+const DEFAULT_CAT_HERO = {
+  image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
+  titleEn: "Azura Selection",
+  titleAr: "قائمة أزورا الفاخرة",
+  descEn: "Handcrafted recipes made with premium, fresh ingredients",
+  descAr: "أصناف ومأكولات محضرة بأجود المكونات الطازجة"
+};
+
+const ITEMS_PER_PAGE = 24;
+
+// Memoized individual item card for peak scroll performance
+const MenuItemCard = memo(({
+  item,
+  lang,
+  idx,
+  onClick,
+  CATS
+}: {
+  item: MenuItem;
+  lang: string;
+  idx: number;
+  onClick: (item: MenuItem) => void;
+  CATS: any[];
+}) => {
+  const cat = CATS.find(c => c.id === item.category) || CATS.find(c => (CAT_ALIASES[c.id] || []).includes(item.category));
+  const hasDesc = lang === "ar" ? item.descriptionAr : item.description;
+
+  return (
+    <div
+      className="group cursor-pointer"
+      onClick={() => onClick(item)}
+      style={{
+        animationDelay: `${idx * 20}ms`,
+        animation: "fadeInSimple 0.25s ease-out forwards",
+        contentVisibility: "auto",
+        containIntrinsicSize: "0 150px"
+      }}
+    >
+      <div className="h-full rounded-2xl bg-card border border-border/30 p-3 shadow-md hover:shadow-lg active:scale-[0.97] transition-all duration-200 group-hover:border-primary/20 flex flex-col justify-between">
+        <div>
+          {/* Badges/Category & Recommendation */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="px-1.5 py-0.5 rounded-full bg-primary/5 text-primary text-[8px] font-bold flex items-center gap-1">
+              <span>{cat?.emoji || "🍽️"}</span>
+              <span>{lang === "ar" ? cat?.ar : cat?.en}</span>
+            </div>
+            {item.recommended && (
+              <span className="text-[10px]" title={lang === "ar" ? "مُوصى به" : "Recommended"}>⭐</span>
+            )}
+            {!item.recommended && item.category === "new_items" && (
+              <span className="text-[8px] font-bold text-red-500 uppercase">{lang === "ar" ? "جديد" : "NEW"}</span>
+            )}
+          </div>
+
+          <h3 className="font-bold text-sm text-foreground line-clamp-1 leading-snug">
+            {lang === "ar" ? item.nameAr : item.name}
+          </h3>
+
+          <p className="text-[10px] text-muted-foreground line-clamp-2 mt-1 min-h-[24px] leading-relaxed">
+            {hasDesc ? hasDesc : (lang === "ar" ? "اضغط لعرض المكونات والتفاصيل الكاملة" : "Click to view ingredients and details")}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/10">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-sm font-black text-primary">{item.price}</span>
+            <span className="text-[8px] text-muted-foreground font-bold uppercase">{lang === "ar" ? "ج.م" : "EGP"}</span>
+          </div>
+          <div className="text-[9px] text-primary/80 font-bold group-hover:text-primary transition-colors flex items-center gap-0.5">
+            <span>{lang === "ar" ? "تفاصيل" : "Details"}</span>
+            <span className="text-[8px]">{lang === "ar" ? "←" : "→"}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Item Detail Modal Component - Fixed for Mobile Comfort (Bottom Sheet on Mobile)
+function ItemModal({ item, onClose, lang }: { item: MenuItem; onClose: () => void; lang: "en" | "ar" }) {
+  const tr = (en: string, ar: string) => lang === "ar" ? ar : en;
+  const cat = CATS.find(c => c.id === item.category) || CATS.find(c => (CAT_ALIASES[c.id] || []).includes(item.category));
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      style={{ isolation: 'isolate' }}
+    >
+      {/* Background Overlay - Non-scrollable fixed backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal Content - Bottom Sheet on Mobile, Centered on Desktop */}
+      <div
+        className="relative w-full max-w-md bg-card rounded-t-[2.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden border border-border/20 flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Mobile Handle */}
+        <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-2 sm:hidden" />
+        <div className="overflow-y-auto p-6 sm:p-8 scroll-hide">
+          <div className="flex flex-col sm:flex-row gap-6">
+            {/* Image */}
+            <div className="w-full sm:w-48 h-48 sm:h-48 rounded-2xl overflow-hidden bg-muted flex-shrink-0">
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-6xl">
+                  {cat?.emoji || "🍽️"}
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground leading-tight">
+                    {item.name}
+                  </h2>
+                  {item.nameAr && (
+                    <p className="text-lg text-muted-foreground font-medium mt-1" dir="rtl">
+                      {item.nameAr}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={lang === "ar" ? "إغلاق" : "Close"}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl font-black text-primary">
+                  {item.price}
+                </span>
+                <span className="text-sm text-muted-foreground font-bold uppercase tracking-wider">
+                  {lang === "ar" ? "ج.م" : "EGP"}
+                </span>
+                {cat && (
+                  <span className="ml-auto badge bg-primary/5 text-primary border border-primary/10">
+                    {cat.emoji} {lang === "ar" ? cat.ar : cat.en}
+                  </span>
+                )}
+              </div>
+
+              {/* Description */}
+              {(item.description || item.descriptionAr) && (
+                <div className="mb-6 p-4 rounded-2xl bg-muted/30 border border-border/30">
+                  <p className="text-sm text-foreground/80 leading-relaxed italic">
+                    "{lang === "ar" ? (item.descriptionAr || item.description) : item.description}"
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-6 space-y-6">
+            {/* Ingredients */}
+            <div>
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px]">🧾</span>
+                {tr("Detailed Ingredients", "المكونات التفصيلية")}
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {((lang === "ar" && item.ingredientsAr && item.ingredientsAr.length > 0) ? item.ingredientsAr : item.ingredients) && ((lang === "ar" && item.ingredientsAr && item.ingredientsAr.length > 0) ? item.ingredientsAr : item.ingredients)!.length > 0 ? (
+                  ((lang === "ar" && item.ingredientsAr && item.ingredientsAr.length > 0) ? item.ingredientsAr : item.ingredients)!.map((ing, idx) => (
+                    <div
+                      key={idx}
+                      className="px-3 py-2 rounded-xl bg-card border border-border/60 text-xs font-medium text-foreground/70 flex items-center gap-2"
+                    >
+                      <div className="w-1 h-1 rounded-full bg-primary/40" />
+                      {ing}
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="px-3 py-2 rounded-xl bg-card border border-border/60 text-xs font-medium text-foreground/70 flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-primary/40" />
+                      {lang === "ar" ? "مكونات طازجة" : "Fresh ingredients"}
+                    </div>
+                    <div className="px-3 py-2 rounded-xl bg-card border border-border/60 text-xs font-medium text-foreground/70 flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-primary/40" />
+                      {lang === "ar" ? "جودة عالية" : "Premium quality"}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Info Footer */}
+            <div className="flex flex-col gap-4 pt-6 mt-2 border-t border-border/40">
+              <button
+                onClick={onClose}
+                className="btn-primary w-full py-4 rounded-2xl text-sm font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
+              >
+                {tr("Back to Menu", "العودة للقائمة")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <style>{`
+        @keyframes modalSlideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function MenuLightweight() {
+  const { lang, isRTL } = useLang();
+  const { user } = useAuth();
+
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cat, setCat] = useState("recommended");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [banners, setBanners] = useState<Record<string, { image: string, titleAr: string, titleEn: string, descAr: string, descEn: string }>>({});
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const tr = useCallback((en: string, ar: string) => lang === "ar" ? ar : en, [lang]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const handleSelectItem = useCallback((item: MenuItem | null) => {
+    setSelectedItem(item);
+    if (user?.uid && item) {
+      logUserActivity(user.uid, "view_item", {
+        itemId: item.id,
+        name: item.name,
+        category: item.category
+      }, 6);
+      updateUserCategoryAffinity(user.uid, item.category, 8);
+    }
+  }, [user?.uid]);
+
+  // Fetch banners from Firebase RTDB with polling (every 60 seconds instead of real-time)
+  useEffect(() => {
+    let isCancelled = false;
+    
+    const fetchBanners = async () => {
+      try {
+        const bannersRef = ref(db, "category-banners");
+        const snap = await get(bannersRef);
+        if (!isCancelled && snap.exists()) {
+          setBanners(snap.val());
+        }
+      } catch (e) {
+        console.error("Failed to fetch banners:", e);
+      }
+    };
+
+    // Initial fetch
+    fetchBanners();
+    
+    // Poll every 60 seconds instead of real-time connection
+    const interval = setInterval(fetchBanners, 60000);
+    
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Fetch menu from Firebase with polling (every 30 seconds instead of real-time)
+  useEffect(() => {
+    let isCancelled = false;
+    
+    const fetchMenu = async () => {
+      try {
+        const menuRef = ref(db, "menu");
+        const snap = await get(menuRef);
+        if (isCancelled) return;
+        
+        if (!snap.exists()) { setLoading(false); return; }
+        const data = snap.val() as Record<string, Record<string, unknown>>;
+        const result: MenuItem[] = [];
+        Object.entries(data).forEach(([key, val]) => {
+          if (typeof val !== "object" || val === null) return;
+          const v = val as Record<string, unknown>;
+          if (v.price !== undefined || v.name !== undefined) {
+            result.push(normalizeItem(key, v));
+          } else {
+            Object.entries(v).forEach(([subId, subVal]) => {
+              if (typeof subVal === "object" && subVal !== null)
+                result.push(normalizeItem(subId, subVal as Record<string, unknown>, key));
+            });
+          }
+        });
+        if (!isCancelled) {
+          setItems(result);
+          setLoading(false);
+        }
+      } catch (e) {
+        console.error("Failed to fetch menu:", e);
+        if (!isCancelled) setLoading(false);
+      }
+    };
+
+    // Initial fetch
+    fetchMenu();
+    
+    // Poll every 30 seconds instead of real-time connection
+    const interval = setInterval(fetchMenu, 30000);
+    
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Debounced search - faster for snappier feel
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 150);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Track search terms in CRM
+  useEffect(() => {
+    if (debouncedSearch.trim() && user?.uid) {
+      logUserActivity(user.uid, "search_menu", { query: debouncedSearch.trim() }, 3);
+    }
+  }, [debouncedSearch, user?.uid]);
+
+  // Reset page when filter changes
+  useEffect(() => { setPage(1); }, [cat, debouncedSearch]);
+
+  // Unified filtering and counting in a single pass for optimization
+  const { filtered, counts, activeCats } = useMemo(() => {
+    const countsMap: Record<string, number> = {};
+    CATS.forEach(c => countsMap[c.id] = 0);
+
+    const filteredList = items.filter((item) => {
+      if (!item.available) return false;
+
+      const itemCatLower = item.category.toLowerCase().trim();
+      const itemSearchStr = item.searchStr || "";
+
+      // Update counts for ALL categories this item belongs to
+      CATS.forEach(c => {
+        if (c.id === "all") {
+          countsMap["all"]++;
+        } else if (c.id === "recommended") {
+          if (item.recommended) countsMap["recommended"]++;
+        } else {
+          const aliasSet = CAT_ALIAS_SETS[c.id];
+          if (aliasSet ? aliasSet.has(itemCatLower) : itemCatLower === c.id) {
+            countsMap[c.id]++;
+          }
+        }
+      });
+
+      // 1. Search filter (Enhanced)
+      if (debouncedSearch) {
+        const q = normalizeText(debouncedSearch);
+
+        // Direct match
+        let isMatch = itemSearchStr.includes(q);
+
+        // Synonym match
+        if (!isMatch) {
+          for (const entry of NORMALIZED_SYNONYMS) {
+            const { key: normalizedKey, synonyms } = entry;
+            if (q.includes(normalizedKey) || normalizedKey.includes(q)) {
+              if (synonyms.some(s => itemSearchStr.includes(s))) {
+                isMatch = true;
+                break;
+              }
+            }
+            if (synonyms.some(s => s.includes(q))) {
+               if (itemSearchStr.includes(normalizedKey)) {
+                 isMatch = true;
+                 break;
+               }
+            }
+          }
+        }
+
+        if (!isMatch) return false;
+      }
+
+      // 2. Category filter
+      // If searching, we show global results UNLESS the user explicitly chose a category other than 'all' or 'recommended'
+      const isSearching = !!debouncedSearch;
+      const isFilteredCat = cat !== "all" && cat !== "recommended";
+
+      if (isSearching) {
+        if (isFilteredCat) {
+          const aliasSet = CAT_ALIAS_SETS[cat];
+          if (aliasSet ? !aliasSet.has(itemCatLower) : itemCatLower !== cat) return false;
+        }
+        // If searching and cat is "all" or "recommended", show global results.
+      } else {
+        if (cat !== "all") {
+          if (cat === "recommended") {
+            if (!item.recommended) return false;
+          } else {
+            const aliasSet = CAT_ALIAS_SETS[cat];
+            if (aliasSet ? !aliasSet.has(itemCatLower) : itemCatLower !== cat) return false;
+          }
+        }
+      }
+
+      return true;
+    });
+
+    const active = CATS.filter(c => c.id === "all" || countsMap[c.id] > 0);
+    return { filtered: filteredList, counts: countsMap, activeCats: active };
+  }, [items, cat, debouncedSearch]);
+
+  // Paginated items
+  const paginated = useMemo(() => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, page]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#FDF5E6] to-[#FAF0E6]" dir={isRTL ? "rtl" : "ltr"}>
+      {/* Header */}
+      <div
+        className="sticky top-0 z-30 bg-[#2D1B0F]"
+        style={{
+          background: "linear-gradient(180deg, #1A0F08 0%, #2D1B0F 100%)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+        }}
+      >
+        {/* Hero band — logo + branding */}
+        <div className="relative px-4 pt-4 pb-3 flex items-center gap-3 overflow-hidden">
+          {/* subtle texture overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.06] pointer-events-none"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)",
+              backgroundSize: "6px 6px",
+            }}
+          />
+
+          {/* Logo */}
+          <div className="relative flex-shrink-0">
+            <div
+              className="absolute inset-0 rounded-2xl blur-lg opacity-40"
+              style={{ background: "rgba(255,200,80,0.6)", transform: "scale(1.2) translateY(4px)" }}
+            />
+            <div
+              className="relative rounded-2xl p-[3px] border border-white/20"
+              style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(6px)" }}
+            >
+              <img
+                src="/logo.jpg"
+                alt="Azura"
+                className="w-14 h-14 rounded-[14px] object-cover"
+                style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}
+              />
+            </div>
+          </div>
+
+          {/* Brand text */}
+          <div className="flex-1 min-w-0 z-10">
+            <h1
+              className="text-xl font-extrabold text-white leading-tight tracking-tight"
+              style={{ fontFamily: "var(--font-heading)", textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}
+            >
+              {lang === "ar" ? "أزورا كافيه" : "Azura Cafe"}
+            </h1>
+            <p
+              className="text-[11px] font-medium mt-0.5 italic"
+              style={{ color: "rgba(255,210,100,0.85)", fontFamily: "var(--font-handwritten)", fontSize: "0.85rem" }}
+            >
+              {tr("The quality is a habit", "الجودة عادة")}
+            </p>
+            <p className="text-[10px] text-white/50 mt-0.5">
+              {filtered.length} {tr("items", "صنف")}
+            </p>
+          </div>
+
+          {/* Offers & Full menu links */}
+          <div className="flex-shrink-0 z-10 flex flex-col gap-1.5">
+            <a
+              href="/offers"
+              className="px-3 py-1.5 rounded-xl text-white text-[10px] font-bold flex items-center gap-1.5 transition-all hover:scale-105"
+              style={{ background: "linear-gradient(135deg, #f59e0b, #ea580c)", backdropFilter: "blur(6px)" }}
+              title={tr("View Special Offers", "شاهد العروض المميزة")}
+            >
+              <Gift size={12} />
+              <span>{tr("Offers", "العروض")}</span>
+            </a>
+            <a
+              href="https://azura-menu.pages.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-xl text-white text-[10px] font-bold flex items-center gap-1.5 transition-colors"
+              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
+              title={tr("View Full Menu", "القائمة الكاملة")}
+            >
+              <span>📖</span>
+              <span className="hidden sm:inline">{tr("Full Menu", "القائمة")}</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative px-4 pb-3">
+          <Search size={16} className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? "right-7" : "left-7"} text-gray-400`} />
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder={tr("Search for something tasty...", "ابحث عن شيء لذيذ...")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={`w-full py-2.5 rounded-2xl text-sm bg-white shadow-lg border-0 focus:ring-2 focus:ring-amber-300 ${
+              isRTL ? "pr-9 pl-4" : "pl-9 pr-4"
+            }`}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? "left-7" : "right-7"} text-gray-400 hover:text-gray-600`}
+              aria-label={tr("Clear Search", "مسح البحث")}
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Categories - Only show active ones to clean up UI */}
+      <div className="sticky top-[105px] z-20 bg-[#FDF5E6] px-4 py-3 border-b border-[#D2B48C]">
+        <div className="flex gap-2.5 overflow-x-auto scroll-hide pb-1 will-change-transform">
+          {activeCats.map((c, idx) => {
+            const isOffersLink = c.id === "offers_link";
+            return (
+              <button
+                key={c.id}
+                onClick={() => {
+                  // Handle offers link - navigate to offers page
+                  if (isOffersLink) {
+                    window.location.href = "/offers";
+                    return;
+                  }
+                  setCat(c.id);
+                  if (search) setSearch(""); // Clear search when switching sections manually
+                  if (user?.uid) {
+                    logUserActivity(user.uid, "click_category", { category: c.id }, 5);
+                    updateUserCategoryAffinity(user.uid, c.id, 10);
+                  }
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold whitespace-nowrap
+                  transition-all duration-300 ease-out shadow-sm
+                  ${isOffersLink 
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 hover:scale-105" 
+                    : cat === c.id 
+                      ? "bg-gradient-to-r from-[#654321] to-[#8B4513] text-white shadow-lg shadow-[#D2B48C] scale-105" 
+                      : "bg-white text-[#654321] hover:bg-[#FDF5E6] hover:scale-102"
+                  }
+                `}
+                style={{ 
+                  animationDelay: `${idx * 50}ms`,
+                  transform: (cat === c.id || isOffersLink) ? "scale(1.05)" : "scale(1)"
+                }}
+              >
+                <span className="text-lg">{c.emoji}</span>
+                <span>{lang === "ar" ? c.ar : c.en}</span>
+                {!isOffersLink && (
+                  <span className={`
+                    text-[10px] px-1.5 py-0.5 rounded-full font-bold
+                    ${cat === c.id ? "bg-white/20 text-white" : "bg-[#D2B48C] text-[#654321]"}
+                  `}>
+                    {counts[c.id] || 0}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden bg-card border border-border/40 shadow-sm animate-pulse">
+                <div className="relative h-36 bg-muted" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : paginated.length === 0 ? (
+          <div className="text-center py-20 flex flex-col items-center">
+            <div className="text-7xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>🔍</div>
+            <p className="text-xl font-bold text-gray-700">{tr("Nothing found", "لا توجد نتائج")}</p>
+            <p className="text-sm text-gray-500 mt-2">{tr("Try a different search", "جرب بحث مختلف")}</p>
+            <button
+              onClick={() => setSearch("")}
+              className="mt-8 px-8 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
+            >
+              {tr("Clear Search", "مسح البحث")}
+            </button>
+          </div>
+        ) : (
+          /* GRID VIEW WITH SHIMMER */
+          <>
+            {/* Category Hero Header Banner */}
+            {!search && (() => {
+              const hero = banners[cat] || CAT_HERO_IMAGES[cat] || DEFAULT_CAT_HERO;
+              const currentCatObj = CATS.find(c => c.id === cat);
+              return (
+                <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-md mb-6 border border-border/20 group">
+                  <img
+                    src={hero.image}
+                    alt={cat}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xl">{currentCatObj?.emoji || "🍽️"}</span>
+                      <h2 className="text-base font-black tracking-wide">
+                        {lang === "ar" ? hero.titleAr : hero.titleEn}
+                      </h2>
+                    </div>
+                    <p className="text-[11px] text-white/80 font-medium line-clamp-2 leading-relaxed">
+                      {lang === "ar" ? hero.descAr : hero.descEn}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="grid grid-cols-2 gap-4">
+              {paginated.map((item, idx) => (
+                <MenuItemCard
+                  key={item.id}
+                  item={item}
+                  lang={lang}
+                  idx={idx}
+                  onClick={handleSelectItem}
+                  CATS={CATS}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center gap-4 mt-8 mb-4">
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => handlePageChange(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="px-3 h-10 rounded-xl bg-white shadow-sm border border-border/40 flex items-center gap-1 disabled:opacity-30 hover:bg-muted transition-all active:scale-95 text-[#654321] font-bold text-xs"
+                aria-label={tr("Previous Page", "الصفحة السابقة")}
+              >
+                {isRTL ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                <span>{tr("Prev", "السابق")}</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 mx-1">
+                {(() => {
+                  const maxVisible = 4;
+                  const chunkIndex = Math.floor((page - 1) / maxVisible);
+                  const start = (chunkIndex * maxVisible) + 1;
+                  const end = Math.min(totalPages, start + maxVisible - 1);
+
+                  const pages = [];
+                  for (let i = start; i <= end; i++) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => handlePageChange(i)}
+                        className={`w-9 h-9 rounded-xl text-sm font-bold transition-all active:scale-90 ${
+                          page === i
+                            ? "bg-[#654321] text-white shadow-md scale-105"
+                            : "bg-white text-[#654321] border border-border/40 hover:bg-muted"
+                        }`}
+                        aria-label={`${tr("Page", "صفحة")} ${i}`}
+                        aria-current={page === i ? "page" : undefined}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+                  return pages;
+                })()}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+                className="px-3 h-10 rounded-xl bg-white shadow-sm border border-border/40 flex items-center gap-1 disabled:opacity-30 hover:bg-muted transition-all active:scale-95 text-[#654321] font-bold text-xs"
+                aria-label={tr("Next Page", "الصفحة التالية")}
+              >
+                <span>{tr("Next", "التالي")}</span>
+                {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+              </button>
+            </div>
+
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+              {tr("Page", "صفحة")} {page} {tr("of", "من")} {totalPages}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom spacer for nav */}
+      <div className="h-24" />
+      
+      {/* Item Detail Modal */}
+      {selectedItem && (
+        <ItemModal 
+          item={selectedItem} 
+          onClose={() => setSelectedItem(null)} 
+          lang={lang}
+        />
+      )}
+      
+      {/* Global Styles */}
+      <style>{`
+        @keyframes fadeInSimple {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+        
+        .scroll-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scroll-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
+}
