@@ -40,7 +40,7 @@ jobs:
         run: chmod +x build-cf.sh
 
       - name: Build and copy dist
-        run: ./build-cf.sh
+        run: bash ./build-cf.sh
         env:
           CI: true
 
