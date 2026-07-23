@@ -271,22 +271,28 @@ export default function AIBarista() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const buildSystemPrompt = () => {
-    // Group items by category for better context, filtering unavailable items
-    const byCategory = menuItems
+    // Limit items to reduce token count (Groq free tier: 6000 TPM)
+    const popularCategories = ['coffee', 'hot_drinks', 'mocktails', 'desserts', 'appetizers', 'burgers', 'pasta', 'fresh_juices', 'frappuccino', 'milkshakes'];
+    const limitedItems = menuItems
       .filter(i => i.available)
-      .reduce((acc, item) => {
-        const cat = item.category || "other";
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(item);
-        return acc;
-      }, {} as Record<string, MenuItem[]>);
+      .filter(i => popularCategories.includes(i.category) || i.recommended)
+      .slice(0, 40); // Max 40 items to stay under token limit
     
+    // Group items by category
+    const byCategory = limitedItems.reduce((acc, item) => {
+      const cat = item.category || "other";
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(item);
+      return acc;
+    }, {} as Record<string, MenuItem[]>);
+    
+    // Simplified format to reduce tokens
     const menuCtx = Object.entries(byCategory)
       .map(([cat, items]) => `=== ${cat.toUpperCase()} ===\n` + 
         items.map((i) => {
           const details = lang === "ar"
-            ? `${i.nameAr || i.name}${i.descriptionAr ? `: ${i.descriptionAr}` : ""}${i.ingredientsAr ? ` (المكونات: ${i.ingredientsAr})` : ""} - السعر: ${i.price} ج.م`
-            : `${i.name}${i.description ? `: ${i.description}` : ""}${i.ingredients ? ` (Ingredients: ${i.ingredients})` : ""} - Price: ${i.price} EGP`;
+            ? `${i.nameAr || i.name} - ${i.price} ج.م`
+            : `${i.name} - ${i.price} EGP`;
           return `• [ID: ${i.id}] ${details}`;
         })
         .join("\n"))

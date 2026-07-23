@@ -588,36 +588,47 @@ export default function MenuLightweight() {
     }
   }, [user?.uid]);
 
-  // Fetch offers from Firebase
-  const fetchOffers = useCallback(async () => {
-    setLoadingOffers(true);
-    try {
-      const offersRef = ref(db, "offers");
-      const snap = await get(offersRef);
-      if (snap.exists()) {
-        const data = snap.val() as Record<string, Omit<Offer, "id">>;
-        const loadedOffers = Object.entries(data)
-          .map(([id, o]) => ({ id, ...o }))
-          .filter((o) => o.active)
-          .sort((a, b) => (a.order || 0) - (b.order || 0));
-        setOffers(loadedOffers);
-      } else {
-        setOffers([]);
-      }
-    } catch (e) {
-      console.error("Failed to fetch offers:", e);
-      setOffers([]);
-    } finally {
-      setLoadingOffers(false);
-    }
-  }, []);
-
-  // Fetch offers when category is "offers"
+  // Fetch offers from Firebase with polling (only when on offers category)
   useEffect(() => {
-    if (cat === "offers") {
-      fetchOffers();
-    }
-  }, [cat, fetchOffers]);
+    if (cat !== "offers") return;
+    
+    let isCancelled = false;
+    
+    const fetchOffers = async () => {
+      if (isCancelled) return;
+      setLoadingOffers(true);
+      try {
+        const offersRef = ref(db, "offers");
+        const snap = await get(offersRef);
+        if (isCancelled) return;
+        if (snap.exists()) {
+          const data = snap.val() as Record<string, Omit<Offer, "id">>;
+          const loadedOffers = Object.entries(data)
+            .map(([id, o]) => ({ id, ...o }))
+            .filter((o) => o.active)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+          setOffers(loadedOffers);
+        } else {
+          setOffers([]);
+        }
+      } catch (e) {
+        if (!isCancelled) console.error("Failed to fetch offers:", e);
+      } finally {
+        if (!isCancelled) setLoadingOffers(false);
+      }
+    };
+
+    // Initial fetch
+    fetchOffers();
+    
+    // Poll every 5 seconds while on offers page
+    const interval = setInterval(fetchOffers, 5000);
+    
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [cat]);
 
   // Fetch banners from Firebase RTDB with polling (every 60 seconds instead of real-time)
   useEffect(() => {

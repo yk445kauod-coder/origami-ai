@@ -75,12 +75,13 @@ export async function chatWithPollinations(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         messages: [
-          { role: "system", content: systemPrompt },
-          ...formattedHistory,
+          { role: "system", content: systemPrompt.slice(0, 2000) }, // Limit system prompt
+          ...formattedHistory.slice(-5), // Only last 5 messages
           { role: "user", content: message }
         ],
         model: "openai",
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 300
       }),
     });
 
@@ -89,27 +90,32 @@ export async function chatWithPollinations(
       const content = data.choices?.[0]?.message?.content;
       if (content) return content;
     }
+    
+    // Handle rate limits or errors
+    if (res.status === 402 || res.status === 429) {
+      console.warn("Pollinations rate limit or payment required");
+    }
   } catch (err) {
-    console.warn("Pollinations POST endpoint failed, trying GET fallback:", err);
+    console.warn("Pollinations POST endpoint failed:", err);
   }
 
-  // Fallback to GET endpoint which is robust and bypasses Cloudflare 502 Bad Gateway
+  // Fallback to GET endpoint
   try {
-    const historyText = history.map((h) => `${h.role === 'model' ? 'Assistant' : 'User'}: ${h.parts[0]?.text || ""}`).join("\n");
+    const historyText = history.slice(-3).map((h) => `${h.role === 'model' ? 'Assistant' : 'User'}: ${h.parts[0]?.text || ""}`).join("\n");
     const fullPrompt = historyText ? `${historyText}\nUser: ${message}` : message;
 
-    // Append model=openai to utilize the full free reasoning model on pollinations.ai
-    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?system=${encodeURIComponent(systemPrompt)}&model=openai`;
+    // Use smaller model for GET endpoint
+    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt.slice(0, 1000))}?system=${encodeURIComponent(systemPrompt.slice(0, 1500))}&model=openai`;
 
     const res = await fetch(getUrl);
     if (res.ok) {
       const text = await res.text();
-      if (text) return text;
+      if (text && text.length < 5000) return text;
     }
-    throw new Error(`GET request failed with status: ${res.status}`);
+    throw new Error(`Pollinations GET failed with status: ${res.status}`);
   } catch (err) {
-    console.error("Pollinations GET fallback failed:", err);
-    throw err;
+    console.error("All Pollinations endpoints failed:", err);
+    throw new Error("AI service temporarily unavailable. Please try again later.");
   }
 }
 
@@ -173,6 +179,10 @@ export async function chatWithAI(
   const url = "https://api.groq.com/openai/v1/chat/completions";
 
   try {
+    // Limit system prompt and history to stay under TPM limit
+    const limitedSystemPrompt = systemPrompt.slice(0, 2500);
+    const limitedHistory = history.slice(-5); // Only last 5 messages
+    
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -182,15 +192,15 @@ export async function chatWithAI(
       body: JSON.stringify({
         model: "llama-3.1-8b-instant", // High-rate-limit free model with good Arabic & English support
         messages: [
-          { role: "system", content: systemPrompt },
-          ...history.map((h) => ({
+          { role: "system", content: limitedSystemPrompt },
+          ...limitedHistory.map((h) => ({
             role: h.role === 'model' ? 'assistant' : 'user',
             content: h.parts[0]?.text || "",
           })),
           { role: "user", content: message }
         ],
         temperature: 0.85,
-        max_tokens: 700,
+        max_tokens: 500, // Reduced from 700
       }),
     });
 
