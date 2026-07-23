@@ -52,68 +52,202 @@ export function isValidApiKey(key: string): boolean {
 
 // ── AI Chat ─────────────────────────────────────────────────
 
-/**
- * Fallback AI Chat using Pollinations.ai (Free text API)
- * Features a highly resilient GET fallback if the POST endpoint is offline or 502'ing.
- */
-export async function chatWithPollinations(
+interface AIProvider {
+  name: string;
+  endpoint: string;
+  model?: string;
+  requiresKey: boolean;
+  supportsCors?: boolean;
+}
+
+// Available AI Providers
+const AI_PROVIDERS: Record<string, AIProvider> = {
+  groq: {
+    name: "Groq",
+    endpoint: "https://api.groq.com/openai/v1/chat/completions",
+    model: "llama-3.1-8b-instant",
+    requiresKey: true,
+    supportsCors: true,
+  },
+  bazaarlink: {
+    name: "BazarLink",
+    endpoint: "https://bazaarlink.ai/api/v1/chat/completions",
+    model: "openai",
+    requiresKey: false,
+    supportsCors: true,
+  },
+  cerbras: {
+    name: "Cerbras",
+    endpoint: "https://api.cerbras.ai/v1/chat/completions",
+    model: "openai",
+    requiresKey: true,
+    supportsCors: true,
+  },
+  openai: {
+    name: "OpenAI Compatible",
+    endpoint: "",
+    requiresKey: true,
+    supportsCors: true,
+  },
+  pollinations: {
+    name: "Pollinations",
+    endpoint: "https://text.pollinations.ai/openai/chat/completions",
+    model: "openai",
+    requiresKey: false,
+    supportsCors: true,
+  },
+};
+
+// Call any OpenAI-compatible API with CORS handling
+async function callOpenAICompatible(
+  endpoint: string,
+  model: string,
+  messages: Array<{ role: string; content: string }>,
+  apiKey?: string,
+  maxTokens: number = 500
+): Promise<string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (apiKey) {
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  }
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: maxTokens,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "Unknown error");
+    throw new Error(`API Error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+// Call BazarLink (no auth required, CORS-friendly)
+async function chatWithBazarLink(
   message: string,
   history: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string
 ): Promise<string> {
-  const formattedHistory = history.map((h) => ({
-    role: h.role === 'model' ? 'assistant' : 'user',
-    content: h.parts[0]?.text || "",
-  }));
+  const limitedHistory = history.slice(-5);
+  const limitedSystem = systemPrompt.slice(0, 2000);
+  
+  const messages = [
+    { role: "system", content: limitedSystem },
+    ...limitedHistory.map((h) => ({
+      role: h.role === 'model' ? 'assistant' : 'user',
+      content: h.parts[0]?.text || "",
+    })),
+    { role: "user", content: message }
+  ];
 
-  // First try the official OpenAI-compatible POST endpoint
-  const url = "https://text.pollinations.ai/openai/chat/completions";
+  return callOpenAICompatible(
+    "https://bazaarlink.ai/api/v1/chat/completions",
+    "openai",
+    messages,
+    undefined,
+    400
+  );
+}
 
+// Call Cerbras API (using OpenAI-compatible endpoint)
+async function chatWithCerbras(
+  apiKey: string,
+  message: string,
+  history: Array<{ role: string; parts: Array<{ text: string }> }>,
+  systemPrompt: string
+): Promise<string> {
+  const limitedHistory = history.slice(-5);
+  const limitedSystem = systemPrompt.slice(0, 2000);
+  
+  const messages = [
+    { role: "system", content: limitedSystem },
+    ...limitedHistory.map((h) => ({
+      role: h.role === 'model' ? 'assistant' : 'user',
+      content: h.parts[0]?.text || "",
+    })),
+    { role: "user", content: message }
+  ];
+
+  // Use Cerebras OpenAI-compatible endpoint
+  return callOpenAICompatible(
+    "https://api.cerbras.ai/v1/chat/completions",
+    "gemma-4-31b", // or "llama-3.3-70b"
+    messages,
+    apiKey,
+    400
+  );
+}
+
+// Call Pollinations (free, no key)
+async function chatWithPollinations(
+  message: string,
+  history: Array<{ role: string; parts: Array<{ text: string }> }>,
+  systemPrompt: string
+): Promise<string> {
+  const limitedHistory = history.slice(-3);
+  const limitedSystem = systemPrompt.slice(0, 1500);
+  
+  const messages = [
+    { role: "system", content: limitedSystem },
+    ...limitedHistory.map((h) => ({
+      role: h.role === 'model' ? 'assistant' : 'user',
+      content: h.parts[0]?.text || "",
+    })),
+    { role: "user", content: message }
+  ];
+
+  // Try POST first
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...formattedHistory,
-          { role: "user", content: message }
-        ],
-        model: "openai",
-        temperature: 0.7
-      }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (content) return content;
-    }
-  } catch (err) {
-    console.warn("Pollinations POST endpoint failed, trying GET fallback:", err);
+    return await callOpenAICompatible(
+      "https://text.pollinations.ai/openai/chat/completions",
+      "openai",
+      messages,
+      undefined,
+      300
+    );
+  } catch (postErr) {
+    console.warn("Pollinations POST failed, trying GET fallback:", postErr);
   }
 
-  // Fallback to GET endpoint which is robust and bypasses Cloudflare 502 Bad Gateway
+  // GET fallback for Pollinations (more resilient)
   try {
-    const historyText = history.map((h) => `${h.role === 'model' ? 'Assistant' : 'User'}: ${h.parts[0]?.text || ""}`).join("\n");
+    const historyText = limitedHistory.map((h) => 
+      `${h.role === 'model' ? 'Assistant' : 'User'}: ${h.parts[0]?.text || ""}`
+    ).join("\n");
     const fullPrompt = historyText ? `${historyText}\nUser: ${message}` : message;
-
-    // Append model=openai to utilize the full free reasoning model on pollinations.ai
-    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?system=${encodeURIComponent(systemPrompt)}&model=openai`;
-
+    
+    const shortPrompt = fullPrompt.slice(0, 800);
+    const shortSystem = limitedSystem.slice(0, 1000);
+    
+    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?system=${encodeURIComponent(shortSystem)}&model=openai&seed=${Date.now()}`;
+    
     const res = await fetch(getUrl);
     if (res.ok) {
       const text = await res.text();
-      if (text) return text;
+      if (text && text.length < 4000 && !text.includes("<!DOCTYPE")) {
+        return text;
+      }
     }
-    throw new Error(`GET request failed with status: ${res.status}`);
-  } catch (err) {
-    console.error("Pollinations GET fallback failed:", err);
-    throw err;
+  } catch (getErr) {
+    console.warn("Pollinations GET fallback failed:", getErr);
   }
+
+  throw new Error("All AI services failed. Please try again later.");
 }
 
-// Using Groq API with smart conversational AI (Primary)
+// Main AI Chat function with provider selection
 export async function chatWithAI(
   apiKey: string,
   message: string,
@@ -133,78 +267,77 @@ export async function chatWithAI(
       openaiEndpoint = data.openaiEndpoint || "";
     }
   } catch (e) {
-    console.warn("Could not load AI settings, defaulting to groq", e);
+    console.warn("Could not load AI settings, using default", e);
   }
 
-  const formattedHistory = history.map((h) => ({
-    role: h.role === 'model' ? 'assistant' : 'user',
-    content: h.parts[0]?.text || "",
-  }));
-
-  // Pollinations.ai (Free Fallback)
-  if (aiProvider === "pollinations" || (!apiKey && aiProvider !== "pollinations")) {
-    return chatWithPollinations(message, history, systemPrompt);
-  }
-
-  // OpenAI Compatible
-  if (aiProvider === "openai" && openaiEndpoint) {
-    try {
-      const res = await fetch(`${openaiEndpoint.replace(/\/$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...formattedHistory,
-            { role: "user", content: message }
-          ]
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data.choices?.[0]?.message?.content || "";
-      }
-    } catch (e) {
-      console.error("OpenAI provider error:", e);
-    }
-  }
-
-  const url = "https://api.groq.com/openai/v1/chat/completions";
-
+  // Provider selection
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // High-rate-limit free model with good Arabic & English support
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...history.map((h) => ({
+    switch (aiProvider) {
+      case "bazaarlink":
+        return await chatWithBazarLink(message, history, systemPrompt);
+      
+      case "cerbras":
+        if (!apiKey) throw new Error("Cerbras requires an API key");
+        return await chatWithCerbras(apiKey, message, history, systemPrompt);
+      
+      case "openai":
+        if (!openaiEndpoint || !apiKey) throw new Error("OpenAI requires endpoint and key");
+        return await callOpenAICompatible(
+          openaiEndpoint.replace(/\/$/, "") + "/chat/completions",
+          "gpt-4-turbo",
+          [
+            { role: "system", content: systemPrompt.slice(0, 2000) },
+            ...history.slice(-5).map((h) => ({
+              role: h.role === 'model' ? 'assistant' : 'user',
+              content: h.parts[0]?.text || "",
+            })),
+            { role: "user", content: message }
+          ],
+          apiKey,
+          500
+        );
+      
+      case "pollinations":
+        return await chatWithPollinations(message, history, systemPrompt);
+      
+      case "groq":
+      default:
+        // Groq with fallback to Pollinations
+        if (!apiKey) {
+          console.warn("No Groq API key, falling back to Pollinations");
+          return await chatWithPollinations(message, history, systemPrompt);
+        }
+        
+        const groqMessages = [
+          { role: "system", content: systemPrompt.slice(0, 2500) },
+          ...history.slice(-5).map((h) => ({
             role: h.role === 'model' ? 'assistant' : 'user',
             content: h.parts[0]?.text || "",
           })),
           { role: "user", content: message }
-        ],
-        temperature: 0.85,
-        max_tokens: 700,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.warn("Groq API error, falling back to Pollinations:", err);
-      return chatWithPollinations(message, history, systemPrompt);
+        ];
+        
+        return await callOpenAICompatible(
+          "https://api.groq.com/openai/v1/chat/completions",
+          "llama-3.1-8b-instant",
+          groqMessages,
+          apiKey,
+          500
+        );
     }
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "";
-  } catch (err) {
-    console.warn("Groq error, falling back to Pollinations:", err);
-    return chatWithPollinations(message, history, systemPrompt);
+  } catch (err: any) {
+    console.error(`AI Provider ${aiProvider} failed:`, err);
+    
+    // Fallback chain: Groq -> Pollinations
+    if (aiProvider === "groq" || aiProvider === "openai" || aiProvider === "cerbras") {
+      try {
+        return await chatWithPollinations(message, history, systemPrompt);
+      } catch (fallbackErr) {
+        console.error("Fallback to Pollinations also failed:", fallbackErr);
+      }
+    }
+    
+    throw new Error(`AI service unavailable: ${err.message}`);
   }
 }
 
