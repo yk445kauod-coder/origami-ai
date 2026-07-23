@@ -2941,24 +2941,33 @@ export default function Admin() {
                   onChange={(e) => setApiSettings(p => ({...p, aiProvider: e.target.value as any}))}
                 >
                   <option value="groq">Groq (DeepSeek Qwen)</option>
-                  <option value="pollinations">Pollinations (Free)</option>
+                  <option value="bazaarlink">BazarLink (Free)</option>
+                  <option value="cerbras">Cerbras (Free)</option>
+                  <option value="pollinations">Pollinations (Backup)</option>
                   <option value="openai">OpenAI Compatible</option>
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">
-                  {apiSettings.aiProvider === "openai" ? tr("API Key", "مفتاح API") : tr("Groq API Key","مفتاح API Groq")}
+                  {apiSettings.aiProvider === "openai" ? tr("API Key", "مفتاح API") : 
+                   apiSettings.aiProvider === "cerbras" ? tr("Cerbras API Key", "مفتاح Cerbras") :
+                   tr("Groq/BazarLink API Key","مفتاح API")}
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
                     <input
                       type={showApiKey ? "text" : "password"}
                       className={`${inp} w-full pr-10`}
-                      placeholder={apiSettings.aiProvider === "pollinations" ? "Not required" : "sk-... / gsk_..."}
+                      placeholder={
+                        apiSettings.aiProvider === "pollinations" ? "Not required" :
+                        apiSettings.aiProvider === "bazaarlink" ? "Not required" :
+                        apiSettings.aiProvider === "cerbras" ? "wsb-..." :
+                        "sk-... / gsk_..."
+                      }
                       value={apiSettings.groqKey}
                       onChange={(e) => setApiSettings(p => ({...p, groqKey: e.target.value}))}
-                      disabled={apiSettings.aiProvider === "pollinations"}
+                      disabled={apiSettings.aiProvider === "pollinations" || apiSettings.aiProvider === "bazaarlink"}
                     />
                     <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showApiKey ? <EyeOff size={16}/> : <Eye size={16}/>}
@@ -3039,13 +3048,22 @@ export default function Admin() {
 
               <div className="rounded-xl p-3.5 bg-muted/20 border border-border/10">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${apiSettings.groqKey || apiSettings.aiProvider === 'pollinations' ? "bg-green-500" : "bg-amber-500"}`}/>
+                  <div className={`w-2.5 h-2.5 rounded-full ${
+                    apiSettings.aiProvider === 'bazaarlink' ? "bg-green-500" :
+                    apiSettings.aiProvider === 'cerbras' && apiSettings.groqKey ? "bg-green-500" :
+                    apiSettings.aiProvider === 'pollinations' ? "bg-green-500" :
+                    apiSettings.groqKey ? "bg-green-500" : "bg-amber-500"
+                  }`}/>
                   <span className="text-xs font-semibold">
-                    {apiSettings.aiProvider === 'pollinations' ? tr("Pollinations active (Free)", "مفعل مجاناً عبر بولينيشن") : apiSettings.groqKey ? tr("API key configured","تم إعداد مفتاح الربط") : tr("API key not configured","لم يتم إعداد المفتاح")}
+                    {apiSettings.aiProvider === 'bazaarlink' ? tr("BazarLink active (Free)", "مفعل مجاناً عبر BazarLink") :
+                     apiSettings.aiProvider === 'cerbras' ? tr("Cerbras active", "مفعل عبر Cerbras") :
+                     apiSettings.aiProvider === 'pollinations' ? tr("Pollinations active (Backup)", "مفعل عبر Pollinations") :
+                     apiSettings.groqKey ? tr("API key configured","تم إعداد مفتاح الربط") : 
+                     tr("No API key configured","لم يتم إعداد مفتاح API")}
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-semibold mt-1.5 leading-relaxed">
-                  {tr("The AI service uses Groq DeepSeek Qwen and Pollinations for text/voice.","تستخدم خدمة الذكاء جروك DeepSeek Qwen وبولينيشن للنصوص والصوت.")}
+                  {tr("AI Providers: Groq, BazarLink, Cerbras, Pollinations (free options available).","مزودي الذكاء: Groq, BazarLink, Cerbras, Pollinations (مجاني).")}
                 </p>
               </div>
             </div>
