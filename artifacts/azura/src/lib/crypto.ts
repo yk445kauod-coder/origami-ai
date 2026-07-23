@@ -161,7 +161,7 @@ async function chatWithBazarLink(
   );
 }
 
-// Call Cerbras API
+// Call Cerbras API (using OpenAI-compatible endpoint)
 async function chatWithCerbras(
   apiKey: string,
   message: string,
@@ -180,9 +180,10 @@ async function chatWithCerbras(
     { role: "user", content: message }
   ];
 
+  // Use Cerebras OpenAI-compatible endpoint
   return callOpenAICompatible(
     "https://api.cerbras.ai/v1/chat/completions",
-    "openai",
+    "gemma-4-31b", // or "llama-3.3-70b"
     messages,
     apiKey,
     400
