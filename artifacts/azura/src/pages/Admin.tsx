@@ -754,7 +754,24 @@ const MenuTab = ({ tr, lang, menu, MENU_CATEGORIES, CAT_META }: { tr: any, lang:
                               </div>
                               <div className="flex gap-3 pt-4">
                                 <button onClick={async () => { if (await swalConfirm(tr("Delete?", "حذف؟"), tr("Permanent.", "نهائي."), tr("Delete", "حذف"), tr("Cancel", "إلغاء"))) { await smartRemove(`menu/${item.originalCategory || item.category}/${item.id}`); setSelectedMenuItemId(null); swalSuccess(tr("Deleted!", "تم الحذف!")); } }} className="btn-secondary px-4 py-3 rounded-xl hover:bg-destructive hover:text-white transition-colors"><Trash2 size={16} /></button>
-                                <button disabled={savingMenuId === item.id || !Object.keys(edits).length} onClick={async () => { setSavingMenuId(item.id); await smartUpdate(`menu/${item.originalCategory || item.category}/${item.id}`, edits); setMenuEdits(prev => { const n = { ...prev }; delete n[item.id]; return n; }); swalSuccess(tr("Saved!", "تم الحفظ!")); setSelectedMenuItemId(null); setSavingMenuId(null); }} className="btn-primary flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">{savingMenuId === item.id ? <Bot className="animate-spin" size={16}/> : <Save size={16}/>} {tr("Save Changes", "حفظ التعديلات")}</button>
+                                <button disabled={savingMenuId === item.id || !Object.keys(edits).length} onClick={async () => {
+                                  setSavingMenuId(item.id);
+                                  const oldCat = item.originalCategory || item.category;
+                                  const newCat = edits.category || oldCat;
+                                  if (newCat !== oldCat) {
+                                    // Move item: delete from old category, create in new category
+                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                    const { id: _id, originalCategory: _oc, ...rest } = { ...item, ...edits, category: newCat } as any;
+                                    await smartSet(`menu/${newCat}/${item.id}`, rest);
+                                    await smartRemove(`menu/${oldCat}/${item.id}`);
+                                  } else {
+                                    await smartUpdate(`menu/${oldCat}/${item.id}`, edits);
+                                  }
+                                  setMenuEdits(prev => { const n = { ...prev }; delete n[item.id]; return n; });
+                                  swalSuccess(tr(newCat !== oldCat ? `Moved to ${newCat}!` : "Saved!", newCat !== oldCat ? `تم النقل إلى ${newCat}!` : "تم الحفظ!"));
+                                  setSelectedMenuItemId(null);
+                                  setSavingMenuId(null);
+                                }} className="btn-primary flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">{savingMenuId === item.id ? <Bot className="animate-spin" size={16}/> : <Save size={16}/>} {tr("Save Changes", "حفظ التعديلات")}</button>
                               </div>
                             </div>
                           </div>
@@ -2185,84 +2202,248 @@ const ReviewsTab = ({ tr, feedback, avgRating, ratingDist, maxRatingCount, markF
   </div>
 );
 
+const LUXURY_GRADIENTS = [
+  { label: "Gold Rush",     value: "linear-gradient(135deg,#b8860b,#ffd700,#b8860b)" },
+  { label: "Midnight",      value: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" },
+  { label: "Rose Velvet",   value: "linear-gradient(135deg,#c41e3a,#8b0000,#ff6b9d)" },
+  { label: "Ocean Depth",   value: "linear-gradient(135deg,#004e92,#000428)" },
+  { label: "Forest",        value: "linear-gradient(135deg,#134e5e,#71b280)" },
+  { label: "Azura Brand",   value: "linear-gradient(135deg,#FF6B35,#F7C59F,#FF6B35)" },
+  { label: "Purple Haze",   value: "linear-gradient(135deg,#4a0080,#9b59b6,#4a0080)" },
+  { label: "Slate Dark",    value: "linear-gradient(135deg,#1c1c2e,#2c2c54)" },
+];
+
 const ReelsTab = ({ tr, reels, togglePin, deleteReel }: any) => {
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ videoUrl: "", caption: "", captionAr: "" });
+  const [postType, setPostType] = useState<"video" | "image" | "text">("video");
+  const [form, setForm] = useState({
+    videoUrl: "", caption: "", captionAr: "",
+    image: "",
+    textTitle: "", textTitleAr: "", textBody: "", textBodyAr: "",
+    textGradient: LUXURY_GRADIENTS[0].value, textEmoji: "✨"
+  });
   const [saving, setSaving] = useState(false);
-
-  // Editing state
   const [editingReelId, setEditingReelId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ videoUrl: "", caption: "", captionAr: "" });
 
+  const handleSave = async () => {
+    setSaving(true);
+    const id = `reel_${Date.now()}`;
+    let payload: any = { id, createdAt: Date.now(), likes: 0, authorName: "Azura", caption: form.caption, captionAr: form.captionAr };
+    if (postType === "video") {
+      payload.mediaType = "video"; payload.videoUrl = form.videoUrl;
+    } else if (postType === "image") {
+      payload.mediaType = "image"; payload.image = form.image;
+    } else {
+      payload.mediaType = "text";
+      payload.textTitle = form.textTitle; payload.textTitleAr = form.textTitleAr;
+      payload.textBody = form.textBody; payload.textBodyAr = form.textBodyAr;
+      payload.textGradient = form.textGradient; payload.textEmoji = form.textEmoji;
+      payload.image = "";
+    }
+    await smartSet(`reels/${id}`, payload);
+    setForm({ videoUrl:"",caption:"",captionAr:"",image:"",textTitle:"",textTitleAr:"",textBody:"",textBodyAr:"",textGradient:LUXURY_GRADIENTS[0].value,textEmoji:"✨" });
+    setShowAdd(false); setSaving(false);
+    swalSuccess(tr("Post published!", "تم نشر المنشور!"));
+  };
+
+  const TYPE_TABS = [
+    { id: "video" as const, icon: <Film size={13}/>, en: "Video Reel", ar: "فيديو" },
+    { id: "image" as const, icon: <ImageIcon size={13}/>, en: "Photo Post", ar: "صورة" },
+    { id: "text"  as const, icon: <Sparkles size={13}/>, en: "Luxury Text", ar: "منشور راقٍ" },
+  ];
+
+  const isValid = postType === "video" ? !!form.videoUrl : postType === "image" ? !!form.image : !!form.textTitle;
+
   return (
     <div className="space-y-6 page-enter">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-foreground flex items-center gap-2"><Film size={18} className="text-primary"/> {tr("Reels Management", "إدارة الريلز")}</h3>
-        <button onClick={() => setShowAdd(!showAdd)} className="btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-          {showAdd ? <X size={14}/> : <Plus size={14}/>} {showAdd ? tr("Cancel", "إلغاء") : tr("Add Video", "إضافة فيديو")}
+        <div>
+          <h3 className="font-bold text-foreground flex items-center gap-2"><Film size={18} className="text-primary"/> {tr("Reels & Posts", "الريلز والمنشورات")}</h3>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{reels.length} {tr("published posts", "منشور منشور")}</p>
+        </div>
+        <button onClick={() => setShowAdd(!showAdd)} className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${showAdd ? "btn-secondary" : "btn-primary shadow-md"}`}>
+          {showAdd ? <X size={14}/> : <Plus size={14}/>}
+          {showAdd ? tr("Cancel", "إلغاء") : tr("New Post", "منشور جديد")}
         </button>
       </div>
+
+      {/* Add Form */}
       {showAdd && (
-        <div className="card-elevated rounded-2xl p-5 space-y-4 border border-border/10 bg-card">
-          <input className="input-field px-3 py-2.5 text-sm" placeholder="Instagram/Facebook/TikTok/X URL" value={form.videoUrl} onChange={e => setForm({...form, videoUrl: e.target.value})} />
-          <div className="grid grid-cols-2 gap-3">
-            <input className="input-field px-3 py-2.5 text-sm" placeholder="Caption (EN)" value={form.caption} onChange={e => setForm({...form, caption: e.target.value})} />
-            <input className="input-field px-3 py-2.5 text-sm" dir="rtl" placeholder="Caption (AR)" value={form.captionAr} onChange={e => setForm({...form, captionAr: e.target.value})} />
+        <div className="card-elevated rounded-2xl border border-border/10 bg-card overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* Post type selector */}
+          <div className="flex border-b border-border/10">
+            {TYPE_TABS.map(t => (
+              <button key={t.id} onClick={() => setPostType(t.id)} className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-bold transition-all ${postType === t.id ? "bg-primary/10 text-primary border-b-2 border-primary" : "text-muted-foreground hover:bg-muted/30"}`}>
+                {t.icon} {tr(t.en, t.ar)}
+              </button>
+            ))}
           </div>
-          <button disabled={saving || !form.videoUrl} onClick={async () => {
-            setSaving(true);
-            const id = `reel_${Date.now()}`;
-            await smartSet(`reels/${id}`, { ...form, id, createdAt: Date.now(), likes: 0, authorName: "Azura" });
-            setForm({ videoUrl: "", caption: "", captionAr: "" });
-            setShowAdd(false);
-            setSaving(false);
-            swalSuccess("Reel Added!");
-          }} className="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-            {saving ? <RotateCcw size={16} className="animate-spin"/> : <Save size={16}/>} {tr("Save Reel", "حفظ الفيديو")}
-          </button>
+
+          <div className="p-5 space-y-4">
+            {/* Captions always visible */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Caption (EN)", "الوصف إنجليزي")}</label>
+                <input className="input-field px-3 py-2.5 text-sm" placeholder={tr("e.g. Summer vibes ☀️","مثال: أجواء الصيف ☀️")} value={form.caption} onChange={e => setForm(f=>({...f,caption:e.target.value}))} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Caption (AR)", "الوصف عربي")}</label>
+                <input className="input-field px-3 py-2.5 text-sm" dir="rtl" placeholder="وصف بالعربي..." value={form.captionAr} onChange={e => setForm(f=>({...f,captionAr:e.target.value}))} />
+              </div>
+            </div>
+
+            {/* Video fields */}
+            {postType === "video" && (
+              <div className="animate-in fade-in duration-200">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Video URL","رابط الفيديو")}</label>
+                <input className="input-field px-3 py-2.5 text-sm" placeholder="Instagram / TikTok / Facebook / X URL" value={form.videoUrl} onChange={e => setForm(f=>({...f,videoUrl:e.target.value}))} />
+                <p className="text-[10px] text-muted-foreground mt-1.5">{tr("Paste any public video link from social media.", "الصق أي رابط فيديو عام من منصات التواصل.")}</p>
+              </div>
+            )}
+
+            {/* Image fields */}
+            {postType === "image" && (
+              <div className="animate-in fade-in duration-200">
+                <ImagePicker label={tr("Upload Photo","رفع صورة")} value={form.image} onChange={v => setForm(f=>({...f,image:v}))} />
+              </div>
+            )}
+
+            {/* Text post fields */}
+            {postType === "text" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Title (EN)","العنوان EN")}</label>
+                    <input className="input-field px-3 py-2.5 text-sm" placeholder="e.g. New Season Menu" value={form.textTitle} onChange={e => setForm(f=>({...f,textTitle:e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Title (AR)","العنوان AR")}</label>
+                    <input className="input-field px-3 py-2.5 text-sm" dir="rtl" placeholder="مثال: قائمة الموسم الجديد" value={form.textTitleAr} onChange={e => setForm(f=>({...f,textTitleAr:e.target.value}))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Body (EN)","النص EN")}</label>
+                    <textarea className="input-field px-3 py-2.5 text-sm h-20 resize-none" placeholder="Write your message here..." value={form.textBody} onChange={e => setForm(f=>({...f,textBody:e.target.value}))} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Body (AR)","النص AR")}</label>
+                    <textarea className="input-field px-3 py-2.5 text-sm h-20 resize-none" dir="rtl" placeholder="اكتب رسالتك هنا..." value={form.textBodyAr} onChange={e => setForm(f=>({...f,textBodyAr:e.target.value}))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase mb-2 block">{tr("Background Style","خلفية المنشور")}</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {LUXURY_GRADIENTS.map(g => (
+                      <button key={g.value} title={g.label} onClick={() => setForm(f=>({...f,textGradient:g.value}))} className={`h-10 rounded-xl border-2 transition-all ${form.textGradient === g.value ? "border-primary scale-105 shadow-md" : "border-transparent"}`} style={{ background: g.value }} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">{tr("Accent Emoji","رمز مميز")}</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {["✨","🌟","☕","🍹","🎉","🔥","💎","🌙","🎊","🍃"].map(e => (
+                      <button key={e} onClick={() => setForm(f=>({...f,textEmoji:e}))} className={`w-9 h-9 text-lg rounded-xl border-2 transition-all ${form.textEmoji === e ? "border-primary bg-primary/10 scale-105" : "border-border/20 bg-muted/20 hover:border-primary/40"}`}>{e}</button>
+                    ))}
+                  </div>
+                </div>
+                {/* Preview */}
+                {(form.textTitle || form.textTitleAr) && (
+                  <div className="rounded-2xl overflow-hidden border border-border/20 shadow-lg">
+                    <div className="h-40 relative flex flex-col items-center justify-center p-5 text-center text-white" style={{ background: form.textGradient }}>
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="relative z-10">
+                        <div className="text-3xl mb-2">{form.textEmoji}</div>
+                        <h4 className="text-lg font-black leading-tight">{form.textTitle || form.textTitleAr}</h4>
+                        {form.textBody && <p className="text-xs text-white/80 mt-1 line-clamp-2">{form.textBody}</p>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button disabled={saving || !isValid} onClick={handleSave} className="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+              {saving ? <RotateCcw size={16} className="animate-spin"/> : <Save size={16}/>}
+              {tr("Publish Post","نشر المنشور")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Grid of reels */}
+      {reels.length === 0 && !showAdd && (
+        <div className="text-center py-16 text-muted-foreground">
+          <Film size={32} className="mx-auto mb-3 opacity-20"/>
+          <p className="text-xs font-bold">{tr("No posts yet. Publish your first!", "لا يوجد منشورات. ابدأ الآن!")}</p>
         </div>
       )}
       <div className="grid grid-cols-2 gap-4">
         {reels.map((r: any) => (
-          <div key={r.id} className="card rounded-2xl overflow-hidden border border-border/10 bg-card group text-foreground">
+          <div key={r.id} className="card rounded-2xl overflow-hidden border border-border/10 bg-card group text-foreground shadow-sm">
             {editingReelId === r.id ? (
               <div className="p-4 space-y-3">
-                <h4 className="text-xs font-bold text-primary">{tr("Edit Reel", "تعديل الريل")}</h4>
-                <div className="space-y-2 text-xs">
+                <h4 className="text-xs font-bold text-primary flex items-center gap-1"><Pencil size={12}/> {tr("Edit Post","تعديل المنشور")}</h4>
+                <div className="space-y-2">
+                  {r.mediaType === "video" && (
+                    <div>
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Video URL","رابط الفيديو")}</label>
+                      <input className="input-field px-2 py-1.5 text-xs mt-1" value={editForm.videoUrl} onChange={e => setEditForm({...editForm, videoUrl: e.target.value})} />
+                    </div>
+                  )}
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Video URL", "رابط الفيديو")}</label>
-                    <input className="input-field px-2 py-1.5 text-xs" value={editForm.videoUrl} onChange={e => setEditForm({...editForm, videoUrl: e.target.value})} />
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Caption EN","الوصف EN")}</label>
+                    <input className="input-field px-2 py-1.5 text-xs mt-1" value={editForm.caption} onChange={e => setEditForm({...editForm, caption: e.target.value})} />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Caption (EN)", "الوصف بالإنجليزية")}</label>
-                    <input className="input-field px-2 py-1.5 text-xs" value={editForm.caption} onChange={e => setEditForm({...editForm, caption: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Caption (AR)", "الوصف بالعربية")}</label>
-                    <input className="input-field px-2 py-1.5 text-xs" dir="rtl" value={editForm.captionAr} onChange={e => setEditForm({...editForm, captionAr: e.target.value})} />
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{tr("Caption AR","الوصف AR")}</label>
+                    <input className="input-field px-2 py-1.5 text-xs mt-1" dir="rtl" value={editForm.captionAr} onChange={e => setEditForm({...editForm, captionAr: e.target.value})} />
                   </div>
                 </div>
-                <div className="flex gap-2 text-xs pt-1">
-                  <button onClick={() => setEditingReelId(null)} className="btn-secondary flex-1 py-2 text-xs">{tr("Cancel", "إلغاء")}</button>
-                  <button onClick={async () => {
-                    await smartUpdate(`reels/${r.id}`, editForm);
-                    setEditingReelId(null);
-                    swalSuccess(tr("Reel Updated!", "تم تحديث الريل!"));
-                  }} className="btn-primary flex-1 py-2 text-xs">{tr("Save", "حفظ")}</button>
+                <div className="flex gap-2">
+                  <button onClick={() => setEditingReelId(null)} className="btn-secondary flex-1 py-2 text-xs rounded-xl">{tr("Cancel","إلغاء")}</button>
+                  <button onClick={async () => { await smartUpdate(`reels/${r.id}`, editForm); setEditingReelId(null); swalSuccess(tr("Updated!","تم التحديث!")); }} className="btn-primary flex-1 py-2 text-xs rounded-xl">{tr("Save","حفظ")}</button>
                 </div>
               </div>
             ) : (
               <>
-                <div className="aspect-[9/16] bg-muted relative flex items-center justify-center overflow-hidden">
-                  <Film size={32} className="text-muted-foreground opacity-20" />
-                  {r.pinned && <div className="absolute top-2 left-2 bg-primary text-white p-1 rounded-lg"><Check size={12}/></div>}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                     <button onClick={() => togglePin(r)} className="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center shadow-lg"><Heart size={14} fill={r.pinned ? "currentColor" : "none"} /></button>
-                     <button onClick={() => { setEditingReelId(r.id); setEditForm({ videoUrl: r.videoUrl || "", caption: r.caption || "", captionAr: r.captionAr || "" }); }} className="w-8 h-8 rounded-full bg-white text-amber-500 flex items-center justify-center shadow-lg"><Pencil size={14}/></button>
-                     <button onClick={async () => { if (await swalConfirm(tr("Delete Reel?", "حذف الفيديو؟"), tr("This cannot be undone.", "لا يمكن التراجع."))) deleteReel(r); }} className="w-8 h-8 rounded-full bg-white text-destructive flex items-center justify-center shadow-lg"><Trash2 size={14}/></button>
+                {/* Thumbnail */}
+                <div className="aspect-[9/16] bg-muted/30 relative flex items-center justify-center overflow-hidden">
+                  {r.mediaType === "image" && r.image ? (
+                    <img src={r.image} className="w-full h-full object-cover" alt="" />
+                  ) : r.mediaType === "text" ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-white relative" style={{ background: r.textGradient || LUXURY_GRADIENTS[0].value }}>
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="relative z-10 space-y-2">
+                        <div className="text-4xl">{r.textEmoji || "✨"}</div>
+                        <p className="text-sm font-black leading-tight">{r.textTitle || r.textTitleAr || r.caption}</p>
+                        {(r.textBody || r.textBodyAr) && <p className="text-[10px] text-white/80 line-clamp-3">{r.textBody || r.textBodyAr}</p>}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                      <Film size={28} className="text-muted-foreground opacity-30" />
+                    </div>
+                  )}
+                  {/* Media type badge */}
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-black/60 text-white text-[9px] font-bold flex items-center gap-1">
+                    {r.mediaType === "video" ? <Film size={9}/> : r.mediaType === "text" ? <Sparkles size={9}/> : <ImageIcon size={9}/>}
+                    {r.mediaType || "video"}
+                  </div>
+                  {r.pinned && <div className="absolute top-2 left-2 bg-primary text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1"><Check size={9}/> Pin</div>}
+                  {/* Hover actions */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button onClick={() => togglePin(r)} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${r.pinned ? "bg-primary text-white" : "bg-white text-primary"}`} title={r.pinned ? "Unpin" : "Pin"}><Heart size={15} fill={r.pinned ? "currentColor" : "none"}/></button>
+                    <button onClick={() => { setEditingReelId(r.id); setEditForm({ videoUrl: r.videoUrl||"", caption: r.caption||"", captionAr: r.captionAr||"" }); }} className="w-9 h-9 rounded-full bg-white text-amber-500 flex items-center justify-center shadow-lg"><Pencil size={15}/></button>
+                    <button onClick={async () => { if (await swalConfirm(tr("Delete?","حذف؟"), tr("This cannot be undone.","لا يمكن التراجع."))) deleteReel(r); }} className="w-9 h-9 rounded-full bg-white text-destructive flex items-center justify-center shadow-lg"><Trash2 size={15}/></button>
                   </div>
                 </div>
-                <div className="p-3"><p className="text-[10px] font-bold line-clamp-2">{tr(r.caption, r.captionAr)}</p></div>
+                <div className="p-3">
+                  <p className="text-[10px] font-bold line-clamp-1 text-foreground">{r.caption || r.textTitle || "—"}</p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5">{new Date(r.createdAt).toLocaleDateString()}</p>
+                </div>
               </>
             )}
           </div>
@@ -2521,8 +2702,56 @@ export default function Admin() {
 
   const login = () => { if (pin === ADMIN_PIN) { sessionStorage.setItem("azura-admin", "true"); setAuthed(true); } else setPinErr("Wrong PIN"); };
 
-  const MENU_CATEGORIES = ["recommended", "new_items", "soups", "appetizers", "salads", "pasta", "tortilla", "toast", "croissant", "breakfast", "main_dishes", "burgers", "smash_burgers", "fried_chicken", "hot_drinks", "coffee", "corto", "hot_chocolate", "sahlab", "frappuccino", "iced_coffee", "mojitos", "boba_tea", "fresh_juices", "mocktails", "cocktails", "smoothies", "milkshakes", "waffle", "desserts", "crepes", "pancakes", "add_ons", "shisha", "soft_drinks"];
-  const CAT_META: Record<string, { emoji: string; en: string; ar: string }> = { recommended: { emoji: "⭐", en: "Top Picks", ar: "الأفضل" }, new_items: { emoji: "🆕", en: "New", ar: "جديد" }, soups: { emoji: "🍲", en: "Soup", ar: "شوربة" }, appetizers: { emoji: "🍟", en: "Appetizers", ar: "مقبلات" }, salads: { emoji: "🥗", en: "Salads", ar: "سلطات" }, pasta: { emoji: "🍝", en: "Pasta", ar: "مكرونة" }, tortilla: { emoji: "🌯", en: "Tortilla", ar: "تورتيلا" }, toast: { emoji: "🍞", en: "Toast", ar: "توست" }, croissant: { emoji: "🥐", en: "Croissant", ar: "كرواسون" }, breakfast: { emoji: "🍳", en: "Breakfast", ar: "فطور" }, main_dishes: { emoji: "🍽️", en: "Main Dishes", ar: "أطباق رئيسية" }, burgers: { emoji: "🍔", en: "Burgers", ar: "برجر" }, smash_burgers: { emoji: "🔥", en: "Smash Burgers", ar: "سماش برجر" }, fried_chicken: { emoji: "🍗", en: "Fried Chicken", ar: "فراخ مقلية" }, hot_drinks: { emoji: "☕", en: "Hot Drinks", ar: "مشروبات ساخنة" }, coffee: { emoji: "☕", en: "Coffee", ar: "قهوة" }, corto: { emoji: "🥛", en: "Corto", ar: "كورتو" }, hot_chocolate: { emoji: "🍫", en: "Hot Chocolate", ar: "شوكولاتة ساخنة" }, sahlab: { emoji: "🥛", en: "Sahlab", ar: "سحلب" }, frappuccino: { emoji: "🧊", en: "Frappuccino", ar: "فرابتشينو" }, iced_coffee: { emoji: "🧋", en: "Iced Coffee", ar: "قهوة مثلجة" }, mojitos: { emoji: "🍹", en: "Mojitos", ar: "موجيتو" }, boba_tea: { emoji: "🧋", en: "Boba Tea", ar: "بوبا تي" }, fresh_juices: { emoji: "🍊", en: "Fresh Juices", ar: "عصائر طازجة" }, mocktails: { emoji: "🍸", en: "Mocktails", ar: "موكتيل" }, cocktails: { emoji: "🍹", en: "Cocktails", ar: "كوكتيل" }, smoothies: { emoji: "🥤", en: "Smoothies", ar: "سموذي" }, milkshakes: { emoji: "🥛", en: "Milkshakes", ar: "ميلك شيك" }, waffle: { emoji: "🧇", en: "Waffle", ar: "وافل" }, desserts: { emoji: "🍰", en: "Desserts", ar: "حلويات" }, crepes: { emoji: "🥞", en: "Crepes", ar: "كريب" }, pancakes: { emoji: "🥞", en: "Pancakes", ar: "بان كيك" }, add_ons: { emoji: "➕", en: "Add-ons", ar: "إضافات" }, shisha: { emoji: "💨", en: "Hookah", ar: "شيشة" }, soft_drinks: { emoji: "🥤", en: "Soft Drinks", ar: "مشروبات غازية" } };
+  const MENU_CATEGORIES = [
+    "recommended", "new_items",
+    "breakfast", "toast", "croissant", "soups", "appetizers", "salads", "pasta",
+    "tortilla", "toast_sandwiches", "main_dishes", "burgers", "smash_burgers",
+    "fried_chicken", "add_ons",
+    "hot_drinks", "coffee", "corto", "hot_chocolate", "sahlab", "frappuccino",
+    "iced_coffee", "mocktails", "boba_tea", "fresh_juices", "cocktails",
+    "smoothies", "milkshakes",
+    "waffle", "desserts", "crepes", "mini_pancakes", "pancakes",
+    "extra_drinks", "soft_drinks", "shisha"
+  ];
+  const CAT_META: Record<string, { emoji: string; en: string; ar: string }> = {
+    recommended:     { emoji: "⭐",  en: "Top Picks",              ar: "الأفضل"             },
+    new_items:       { emoji: "🆕",  en: "New Items",              ar: "جديد"               },
+    breakfast:       { emoji: "🍳",  en: "Breakfast",              ar: "إفطار"              },
+    toast:           { emoji: "🥪",  en: "Toast",                  ar: "توست"               },
+    croissant:       { emoji: "🥐",  en: "Croissant",              ar: "كرواسون"            },
+    soups:           { emoji: "🍲",  en: "Soup",                   ar: "شوربة"              },
+    appetizers:      { emoji: "🍢",  en: "Appetizers",             ar: "مقبلات"             },
+    salads:          { emoji: "🥗",  en: "Salads",                 ar: "سلطات"              },
+    pasta:           { emoji: "🍝",  en: "Pasta",                  ar: "مكرونة"             },
+    tortilla:        { emoji: "🌯",  en: "Tortilla Sandwiches",    ar: "تورتيلا ساندوتش"    },
+    toast_sandwiches:{ emoji: "🥖",  en: "Vina Sandwiches",        ar: "ساندوتشات فينا"     },
+    main_dishes:     { emoji: "🍽️", en: "Main Dishes",            ar: "أطباق رئيسية"       },
+    burgers:         { emoji: "🍔",  en: "Beef Burgers",           ar: "برجر لحم"           },
+    smash_burgers:   { emoji: "🔥",  en: "Smash Burgers",          ar: "سماش برجر"          },
+    fried_chicken:   { emoji: "🍗",  en: "Fried Chicken",          ar: "ساندوتشات الفراخ"   },
+    add_ons:         { emoji: "➕",  en: "Extra Kitchen",           ar: "إضافات مطبخ"        },
+    hot_drinks:      { emoji: "☕",  en: "Hot Drinks",             ar: "مشروبات ساخنة"      },
+    coffee:          { emoji: "☕",  en: "Espresso",               ar: "إسبريسو"            },
+    corto:           { emoji: "🥛",  en: "Corto",                  ar: "كورتو"              },
+    hot_chocolate:   { emoji: "🍫",  en: "Hot Chocolate",          ar: "شوكولاتة ساخنة"     },
+    sahlab:          { emoji: "🥛",  en: "Sahlab",                 ar: "سحلب"               },
+    frappuccino:     { emoji: "🧊",  en: "Frappe",                 ar: "فرابتشينو"          },
+    iced_coffee:     { emoji: "🧋",  en: "Iced Drinks",            ar: "مكعبات ثلج"         },
+    mocktails:       { emoji: "🍹",  en: "Mocktails",              ar: "موكتيل"             },
+    boba_tea:        { emoji: "🧋",  en: "Boba Tea",               ar: "بوبا تي"            },
+    fresh_juices:    { emoji: "🍊",  en: "Fresh Juices",           ar: "عصائر طازجة"        },
+    cocktails:       { emoji: "🍸",  en: "Cocktails",              ar: "كوكتيل"             },
+    smoothies:       { emoji: "🥤",  en: "Smoothies",              ar: "سموذي"              },
+    milkshakes:      { emoji: "🥛",  en: "Milkshakes",             ar: "ميلك شيك"           },
+    waffle:          { emoji: "🧇",  en: "Waffle",                 ar: "وافل"               },
+    desserts:        { emoji: "🍰",  en: "Desserts",               ar: "حلويات"             },
+    crepes:          { emoji: "🥞",  en: "Crepe",                  ar: "كريب"               },
+    mini_pancakes:   { emoji: "🥞",  en: "Mini Pancakes",          ar: "بان كيك مصغر"       },
+    pancakes:        { emoji: "🥞",  en: "Pancakes",               ar: "بان كيك"            },
+    extra_drinks:    { emoji: "🥤",  en: "Extra Drinks",           ar: "مشروبات إضافية"     },
+    soft_drinks:     { emoji: "🥤",  en: "Soft Drinks",            ar: "مشروبات غازية"      },
+    shisha:          { emoji: "💨",  en: "Hookah",                 ar: "شيشة"               },
+  };
 
   const activeTables = useMemo(() => {
     return tablesRaw.map(t => ({ ...t, userCount: users.filter(u => u.tableNumber === t.number).length, status: users.some(u => u.tableNumber === t.number) ? "occupied" : "available" })).sort((a,b) => a.number-b.number);
@@ -2546,17 +2775,73 @@ export default function Admin() {
   ];
 
   if (!authed) return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30">
-      <div className="card-elevated p-8 max-w-xs w-full text-center space-y-6 bg-card border border-border/10 rounded-2xl">
-        <div className="flex justify-center text-primary">
-          <ShieldCheck size={40} />
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden" style={{ background: "linear-gradient(145deg,#0a0705 0%,#1a0f08 40%,#251508 70%,#0f0804 100%)" }}>
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-72 h-72 rounded-full opacity-10" style={{ background: "radial-gradient(circle,#FF6B35 0%,transparent 70%)", transform: "translate(-30%,-30%)" }} />
+        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-8" style={{ background: "radial-gradient(circle,#b8860b 0%,transparent 70%)", transform: "translate(30%,30%)" }} />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%)", backgroundSize: "8px 8px" }} />
+      </div>
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-sm px-6">
+        {/* Top branding */}
+        <div className="text-center mb-8">
+          <div className="relative inline-block mb-5">
+            <div className="absolute inset-0 rounded-3xl blur-2xl opacity-50" style={{ background: "rgba(255,180,60,0.5)", transform: "scale(1.3) translateY(8px)" }} />
+            <img src="/logo.jpg" alt="Azura" className="relative w-20 h-20 rounded-2xl object-cover mx-auto shadow-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1)" }} />
+          </div>
+          <h1 className="text-2xl font-black text-white tracking-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>Azura Cafe</h1>
+          <p className="text-xs font-bold mt-1 tracking-widest uppercase" style={{ color: "rgba(255,190,80,0.8)" }}>{tr("Control Panel", "لوحة التحكم")}</p>
         </div>
-        <h1 className="text-lg font-bold text-foreground">{tr("Admin Access", "دخول المشرف")}</h1>
-        <form onSubmit={(e) => { e.preventDefault(); login(); }}>
-          <input type="password" placeholder="PIN" className="input-field text-center py-3 text-lg font-bold tracking-widest w-full mb-4" value={pin} onChange={e => setPin(e.target.value)} />
-          {pinErr && <p className="text-destructive text-xs mb-4 uppercase">{pinErr}</p>}
-          <button type="submit" className="btn-primary w-full py-3 text-sm font-bold">{tr("Login", "دخول")}</button>
-        </form>
+
+        {/* Login card */}
+        <div className="rounded-3xl p-6 space-y-5 border" style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderColor: "rgba(255,255,255,0.12)", boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)" }}>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,200,80,0.15)" }}>
+              <ShieldCheck size={16} className="text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">{tr("Secure Admin Login", "تسجيل دخول آمن")}</p>
+              <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>{tr("Enter your PIN to continue", "أدخل رمز الدخول للمتابعة")}</p>
+            </div>
+          </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); login(); }} className="space-y-4">
+            <div className="relative">
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className="w-full text-center py-4 text-xl font-black tracking-[0.4em] rounded-2xl border outline-none transition-all"
+                style={{ background: "rgba(0,0,0,0.3)", borderColor: pinErr ? "rgba(239,68,68,0.6)" : "rgba(255,255,255,0.15)", color: "white", caretColor: "#FFB840", boxShadow: "inset 0 2px 8px rgba(0,0,0,0.3)" }}
+                value={pin}
+                onChange={e => { setPin(e.target.value); setPinErr(""); }}
+                onFocus={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(255,184,64,0.6)"; }}
+                onBlur={e => { (e.target as HTMLInputElement).style.borderColor = pinErr ? "rgba(239,68,68,0.6)" : "rgba(255,255,255,0.15)"; }}
+              />
+              {pinErr && (
+                <div className="flex items-center gap-1.5 mt-2 px-1">
+                  <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
+                  <p className="text-red-400 text-[11px] font-bold">{tr("Incorrect PIN. Try again.", "رمز خاطئ. حاول مجددًا.")}</p>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-4 rounded-2xl font-black text-sm tracking-wide transition-all active:scale-[0.97]"
+              style={{ background: "linear-gradient(135deg,#b8860b,#d4a017,#b8860b)", color: "#0a0705", boxShadow: "0 4px 20px rgba(184,134,11,0.4), inset 0 1px 0 rgba(255,255,255,0.3)" }}
+            >
+              {tr("Enter Control Panel", "الدخول للوحة التحكم")}
+            </button>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-[10px] mt-6 font-semibold" style={{ color: "rgba(255,255,255,0.2)" }}>
+          Azura Cafe · Tivoli Dome, Alexandria · {tr("Admin Only", "للمشرفين فقط")}
+        </p>
       </div>
     </div>
   );
@@ -2565,32 +2850,71 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background" dir={isRTL ? "rtl" : "ltr"}>
-      <header className="sticky top-0 z-40 bg-card px-4 py-4 flex items-center gap-4 text-foreground border-b border-border/10 shadow-sm glass-premium">
-        <button onClick={() => navigate("/menu")} className="btn-icon w-8 h-8 rounded-full text-foreground flex items-center justify-center bg-white shadow-sm border border-border/10">
-          <ArrowLeft size={16} />
-        </button>
-        <div className="flex flex-col flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-lg leading-none text-primary uppercase tracking-tight">{tr("Azura Control Panel", "لوحة تحكم أزورا")}</span>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-              <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse" : "bg-red-500"}`}/>
-              <span className="text-[8px] font-bold tracking-tight text-primary uppercase">{connected ? tr("Sync Active", "مزامنة نشطة") : tr("Offline", "غير متصل")}</span>
+      {/* Admin Header */}
+      <header className="sticky top-0 z-40 border-b border-border/10" style={{ background: "linear-gradient(180deg,#1a0f08 0%,#2D1B0F 100%)", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}>
+        <div className="px-4 py-3 flex items-center gap-3">
+          {/* Back button */}
+          <button
+            onClick={() => navigate("/menu")}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
+            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}
+          >
+            <ArrowLeft size={15} className="text-white" />
+          </button>
+
+          {/* Logo + Title */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <img src="/logo.jpg" alt="Azura" className="w-8 h-8 rounded-xl object-cover flex-shrink-0" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }} />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-black text-sm text-white leading-none tracking-tight">{tr("Control Panel", "لوحة التحكم")}</span>
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: connected ? "rgba(52,199,89,0.2)" : "rgba(239,68,68,0.2)", border: `1px solid ${connected ? "rgba(52,199,89,0.4)" : "rgba(239,68,68,0.4)"}` }}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
+                  <span className="text-[9px] font-bold" style={{ color: connected ? "#4ade80" : "#f87171" }}>
+                    {connected ? tr("LIVE", "مباشر") : tr("OFFLINE", "منقطع")}
+                  </span>
+                </div>
+              </div>
+              <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,190,80,0.65)" }}>Azura Cafe · Admin</p>
             </div>
           </div>
-          <span className="text-[10px] text-muted-foreground/80 tracking-tighter uppercase mt-0.5 font-bold">mcp protocol services</span>
+
+          {/* Sign out */}
+          <button
+            onClick={() => { sessionStorage.removeItem("azura-admin"); setAuthed(false); }}
+            className="flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all active:scale-95"
+            style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5" }}
+          >
+            {tr("Sign out", "خروج")}
+          </button>
         </div>
-        <button onClick={() => { sessionStorage.removeItem("azura-admin"); setAuthed(false); }} className="text-xs text-primary font-bold hover:underline">Sign out</button>
+
+        {/* Tab navigation */}
+        <div className="px-3 pb-2.5 overflow-x-auto scroll-hide">
+          <div className="flex gap-1.5 min-w-max">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                onClick={() => { setTab(t.id); setSelectedChat(null); }}
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95"
+                style={tab === t.id
+                  ? { background: "rgba(255,184,64,0.25)", color: "#FFB840", border: "1px solid rgba(255,184,64,0.4)", boxShadow: "0 2px 8px rgba(255,184,64,0.2)" }
+                  : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }
+                }
+              >
+                <span style={{ color: tab === t.id ? "#FFB840" : "rgba(255,255,255,0.4)" }}>{t.icon}</span>
+                <span>{tr(t.en, t.ar)}</span>
+                {!!t.badge && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 font-black shadow-sm">
+                    {t.badge}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
-      <nav className="sticky top-[60px] z-30 px-3 py-2.5 overflow-x-auto scroll-hide bg-card border-b border-border shadow-sm glass-premium">
-        <div className="flex gap-2 min-w-max">
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => { setTab(t.id); setSelectedChat(null); }} className={`relative chip flex items-center gap-1.5 ${tab === t.id ? "bg-primary text-primary-foreground shadow-md font-bold" : "bg-white/40 text-muted-foreground border border-border/10 hover:bg-white/60"}`}>
-              {t.icon} <span>{tr(t.en, t.ar)}</span>
-              {!!t.badge && <span className="absolute -top-1 -right-1 bg-destructive text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 font-bold">{t.badge}</span>}
-            </button>
-          ))}
-        </div>
-      </nav>
+
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Suspense fallback={<div className="text-center py-20 opacity-50">Loading...</div>}>
           {tab === "overview" && <OverviewTab tr={tr} users={users} unreadChats={chats.reduce((s,c)=>s+(c.unreadAdmin||0),0)} newReviewsCount={feedback.filter(f=>!f.read).length} logs={logs} menuCount={menu.length} apiSettings={apiSettings} connected={connected} addLog={addLog} />}

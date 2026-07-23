@@ -3,14 +3,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BaristaProvider } from "@/contexts/BaristaContext";
-import { db, ref, get } from "@/lib/firebase";
+import { db, ref, get } from "@/lib/firebase"; // db/ref/get used for feature-flags polling
 import { useEffect, useState, lazy, Suspense } from "react";
 import Layout from "@/components/Layout";
-import { seedMenuIfEmpty, mergeMenuIngredients, cleanDeletedItemsFromDB } from "@/lib/firebase";
+import { seedMenuVersioned } from "@/lib/firebase";
 
 const Welcome = lazy(() => import("@/pages/Welcome"));
 const MenuLightweight = lazy(() => import("@/pages/MenuLightweight"));
-const Offers = lazy(() => import("@/pages/Offers"));
+// Offers is now embedded as the first category in MenuLightweight — no separate page
 const AIBarista = lazy(() => import("@/pages/AIBarista"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Admin = lazy(() => import("@/pages/Admin"));
@@ -42,10 +42,7 @@ function AppRoutes() {
   });
 
   useEffect(() => {
-    seedMenuIfEmpty()
-      .then(() => mergeMenuIngredients())
-      .then(() => cleanDeletedItemsFromDB())
-      .catch(() => {});
+    seedMenuVersioned().catch(() => {});
   }, []);
 
   // Poll feature flags every 5 minutes — Layout.tsx keeps a live onValue for real-time nav updates
@@ -101,7 +98,7 @@ function AppRoutes() {
               <Switch>
                 <Route path="/" component={MenuLightweight} />
                 <Route path="/menu" component={MenuLightweight} />
-                <Route path="/offers" component={Offers} />
+                <Route path="/offers"><Redirect to="/menu" /></Route>
                 <Route path="/barista">
                   {flags.baristaEnabled ? <AIBarista /> : <Redirect to="/menu" />}
                 </Route>

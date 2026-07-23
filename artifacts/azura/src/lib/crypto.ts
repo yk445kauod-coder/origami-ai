@@ -180,7 +180,7 @@ export async function chatWithAI(
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // High quality best Arabic support model
+        model: "llama-3.1-8b-instant", // High-rate-limit free model with good Arabic & English support
         messages: [
           { role: "system", content: systemPrompt },
           ...history.map((h) => ({

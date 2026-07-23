@@ -99,7 +99,7 @@ const CATS = [
   { id: "sahlab",          emoji: "🥛",  en: "Sahlab",                   ar: "سحلب"                },
   { id: "frappuccino",     emoji: "🧊",  en: "Frappe",                   ar: "فرابتشينو"           },
   { id: "iced_coffee",     emoji: "🧋",  en: "Ice Cubes (Iced Drinks)",  ar: "مكعبات ثلج"          },
-  { id: "mocktails",       emoji: "🍹",  en: "Mocktails & Mojitos",      ar: "موكتيل وموجيتو"      },
+  { id: "mocktails",       emoji: "🍹",  en: "Mocktails",                ar: "موكتيل"              },
   { id: "boba_tea",        emoji: "🧋",  en: "Boba Tea",                 ar: "بوبا تي"             },
   { id: "fresh_juices",    emoji: "🍊",  en: "Fresh Juices",             ar: "عصائر طازجة"         },
   { id: "cocktails",       emoji: "🍸",  en: "Cocktails",                ar: "كوكتيل"              },
@@ -1029,13 +1029,14 @@ export default function MenuLightweight() {
                         -{offer.discount}%
                       </div>
                     )}
-                    <div className="relative h-48">
-                      <img
-                        src={offer.image}
-                        alt={lang === "ar" ? offer.titleAr : offer.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="relative h-40 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 flex items-center justify-center overflow-hidden">
+                      {/* Decorative background pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-2 left-4 text-6xl">✨</div>
+                        <div className="absolute bottom-2 right-4 text-5xl">🎁</div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl opacity-20">🎉</div>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       {(offer.badge || offer.badgeAr) && (
                         <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
                           <Sparkles size={12} />
@@ -1051,7 +1052,7 @@ export default function MenuLightweight() {
                         </p>
                         {offer.price !== undefined && offer.originalPrice && offer.originalPrice > offer.price && (
                           <div className="flex items-center gap-2 mt-2">
-                            <span className="text-2xl font-black text-green-400">
+                            <span className="text-2xl font-black text-green-300">
                               {offer.price} {tr("EGP", "ج.م")}
                             </span>
                             <span className="text-sm text-white/60 line-through">

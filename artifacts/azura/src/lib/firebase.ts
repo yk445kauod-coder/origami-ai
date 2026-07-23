@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { fullMenuData } from "./fullMenu";
+import { fullMenuData, MENU_VERSION } from "./fullMenu";
 import {
   getAuth,
   signInAnonymously,
@@ -231,6 +231,42 @@ export async function seedMenuIfEmpty() {
 // Force reseed: overwrite Firebase menu with the full local menu (admin use only)
 export async function forceReseedMenu() {
   await set(ref(db, "menu"), fullMenuData);
+  await set(ref(db, "menu-version"), MENU_VERSION);
+}
+
+// Versioned seeding: only reseed if local MENU_VERSION > Firebase stored version
+export async function seedMenuVersioned() {
+  try {
+    // Always seed banners if missing
+    const bannersRef = ref(db, "category-banners");
+    const bannersSnap = await get(bannersRef);
+    if (!bannersSnap.exists()) {
+      await set(bannersRef, defaultCategoryBanners);
+    }
+
+    // Check stored menu version
+    const versionSnap = await get(ref(db, "menu-version"));
+    const storedVersion = versionSnap.exists() ? Number(versionSnap.val()) : 0;
+
+    if (storedVersion >= MENU_VERSION) {
+      // Up to date — run cleanup/merge only
+      await mergeMenuIngredients();
+      await cleanDeletedItemsFromDB();
+      return;
+    }
+
+    // Stale or missing — force full reseed
+    console.log(`[Azura] Menu version ${storedVersion} → ${MENU_VERSION}: reseeding…`);
+    await set(ref(db, "menu"), fullMenuData);
+    await set(ref(db, "menu-version"), MENU_VERSION);
+
+    // Seed staff and AI config if missing
+    const menuSnap = await get(ref(db, "menu"));
+    if (!menuSnap.exists()) return; // shouldn't happen but guard
+    await cleanDeletedItemsFromDB();
+  } catch (e) {
+    console.error("[Azura] seedMenuVersioned error:", e);
+  }
 }
 
 // Merge updated ingredients + add new categories into Firebase menu

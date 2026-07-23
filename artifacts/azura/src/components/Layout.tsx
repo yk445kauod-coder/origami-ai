@@ -10,7 +10,6 @@ import {
   FilmIcon, 
   ChatBubbleLeftRightIcon, 
   UserIcon,
-  GiftIcon,
 } from "@heroicons/react/24/outline";
 import { 
   HomeIcon as HomeIconSolid, 
@@ -18,12 +17,11 @@ import {
   FilmIcon as FilmIconSolid, 
   ChatBubbleLeftRightIcon as ChatIconSolid, 
   UserIcon as UserIconSolid,
-  GiftIcon as GiftIconSolid,
 } from "@heroicons/react/24/solid";
 
 const ALL_NAV = [
   { path: "/menu",    key: "menu",    label: "القائمة",  labelEn: "Menu",    icon: HomeIcon,    iconActive: HomeIconSolid,    alwaysOn: true },
-  { path: "/offers",  key: "offers",  label: "العروض",   labelEn: "Offers",  icon: GiftIcon,    iconActive: GiftIconSolid,    alwaysOn: false },
+  // Offers removed from nav — now embedded as first category tab in the Menu page
   { path: "/barista", key: "barista", label: "المساعد",  labelEn: "AI",       icon: SparklesIcon, iconActive: SparklesIconSolid, alwaysOn: false },
   { path: "/reels",   key: "reels",   label: "الفيديو",  labelEn: "Reels",    icon: FilmIcon,    iconActive: FilmIconSolid,     alwaysOn: false },
   { path: "/support", key: "support", label: "الدعم",    labelEn: "Support",  icon: ChatBubbleLeftRightIcon, iconActive: ChatIconSolid, alwaysOn: false },
