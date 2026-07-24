@@ -1614,12 +1614,12 @@ export const fullMenuData: Record<string, Record<string, {
     "mini-chocolate-pancakes": {
       name: "Mini Chocolate Pancakes", nameAr: "ميني بان كيك شوكلت",
       description: "Mini chocolate pancakes", descriptionAr: "ميني بان كيك شوكليت",
-      price: 168, category: "mini_pancakes", categoryAr: "بان كيك مصغر", available: true, image: IMG,
+      price: 168, category: "mini_pancakes", categoryAr: "ميني بانكيك", available: true, image: IMG,
     },
     "mix-for-you": {
       name: "Mix For You", nameAr: "مكس فور يو",
       description: "Mixed mini pancakes", descriptionAr: "ميني بان كيك مشكل",
-      price: 198, category: "mini_pancakes", categoryAr: "بان كيك مصغر", available: true, image: IMG,
+      price: 198, category: "mini_pancakes", categoryAr: "ميني بانكيك", available: true, image: IMG,
     },
   },
 

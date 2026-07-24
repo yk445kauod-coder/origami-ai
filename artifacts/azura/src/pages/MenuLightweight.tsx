@@ -109,7 +109,7 @@ const CATS = [
   { id: "waffle",          emoji: "🧇",  en: "Waffle",                   ar: "وافل"                },
   { id: "desserts",        emoji: "🍰",  en: "Desserts",                 ar: "حلويات"              },
   { id: "crepes",          emoji: "🥞",  en: "Crepe",                    ar: "كريب"                },
-  { id: "mini_pancakes",   emoji: "🥞",  en: "Mini Pancakes",            ar: "بان كيك مصغر"        },
+  { id: "mini_pancakes",   emoji: "🥞",  en: "Mini Pancakes",            ar: "ميني بانكيك"         },
   { id: "pancakes",        emoji: "🥞",  en: "Pancakes",                 ar: "بان كيك"             },
   { id: "extra_drinks",    emoji: "🥤",  en: "Extra Drinks",             ar: "مشروبات إضافية"      },
   { id: "soft_drinks",     emoji: "🥤",  en: "Soft Drinks",              ar: "مشروبات غازية"       },
