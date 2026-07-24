@@ -86,7 +86,8 @@ const CATS = [
   { id: "pasta",           emoji: "🍝",  en: "Pasta",                    ar: "مكرونة"              },
   { id: "tortilla",        emoji: "🌯",  en: "Tortilla Sandwiches",      ar: "تورتيلا ساندوتش"     },
   { id: "toast_sandwiches",emoji: "🥖",  en: "Vina Sandwiches",          ar: "ساندوتشات فينا"       },
-  { id: "main_dishes",     emoji: "🍽️",  en: "Main Dishes",              ar: "أطباق رئيسية"         },
+  { id: "chicken_main",    emoji: "🍗",  en: "Chicken Main Dishes",      ar: "أطباق الفراخ الرئيسية" },
+  { id: "main_dishes",     emoji: "🥩",  en: "Beef Main Dishes",         ar: "أطباق اللحم الرئيسية"  },
   { id: "burgers",         emoji: "🍔",  en: "Beef Burgers",             ar: "برجر لحم"            },
   { id: "smash_burgers",   emoji: "🔥",  en: "Smash Burgers",            ar: "سماش برجر"           },
   { id: "fried_chicken",   emoji: "🍗",  en: "Fried Chicken Sandwiches", ar: "ساندوتشات الفراخ"     },
@@ -128,7 +129,8 @@ const CAT_ALIASES: Record<string, string[]> = {
   toast:            ["toast"],
   croissant:        ["croissant"],
   breakfast:        ["breakfast"],
-  main_dishes:      ["main_dishes"],
+  chicken_main:     ["chicken_main", "chicken_dishes", "chicken_main_dishes"],
+  main_dishes:      ["main_dishes", "beef_main", "beef_main_dishes"],
   burgers:          ["burgers", "burger", "beef_burgers"],
   smash_burgers:    ["smash_burgers"],
   fried_chicken:    ["fried_chicken", "fried_chicken_sandwiches"],
@@ -1149,6 +1151,32 @@ export default function MenuLightweight() {
                   />
                 ))}
               </div>
+
+              {/* Side dishes note for main dishes sections */}
+              {(cat === "chicken_main" || cat === "main_dishes") && (
+                <div
+                  className="mt-6 mx-1 rounded-2xl px-5 py-4 flex items-start gap-3"
+                  style={{
+                    background: "linear-gradient(135deg, #FDF5E6 0%, #FAE8C8 100%)",
+                    border: "1.5px dashed rgba(180,120,50,0.45)",
+                    boxShadow: "0 2px 12px rgba(101,67,33,0.07)",
+                  }}
+                >
+                  <span className="text-2xl flex-shrink-0 mt-0.5">🍽️</span>
+                  <p
+                    className="text-sm font-bold leading-relaxed"
+                    style={{ color: "#5C3A1E", direction: "rtl", textAlign: "right" }}
+                  >
+                    يتم تقديم الأطباق مع{" "}
+                    <span style={{ color: "#8B4513" }}>2 من أطباق جانبية</span>{" "}
+                    من اختيارك
+                    <br />
+                    <span className="font-normal text-xs" style={{ color: "rgba(92,58,30,0.75)" }}>
+                      ( باستا &nbsp;•&nbsp; ماش &nbsp;•&nbsp; فرايز &nbsp;•&nbsp; أرز &nbsp;•&nbsp; سوتيه )
+                    </span>
+                  </p>
+                </div>
+              )}
             </>
           )
         )}

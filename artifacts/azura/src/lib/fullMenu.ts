@@ -1,7 +1,7 @@
 // Full Azura Cafe Menu — sourced from official PDF menu (azura-menu.pages.dev)
 // DO NOT edit manually — use admin panel or forceReseedMenu() to update Firebase
 
-export const MENU_VERSION = 2; // Bump this to trigger auto-reseed in all clients
+export const MENU_VERSION = 3; // Bump this to trigger auto-reseed in all clients
 
 const IMG = ""; // Item images are intentionally blank — only category banners are displayed
 
@@ -390,78 +390,80 @@ export const fullMenuData: Record<string, Record<string, {
     },
   },
 
-  // ─── MAIN DISHES ──────────────────────────────────────────────────────────
-  "main_dishes": {
-    // Chicken
+  // ─── CHICKEN MAIN DISHES ──────────────────────────────────────────────────
+  "chicken_main": {
     "chicken-grill": {
       name: "Chicken Grill", nameAr: "تشيكن جريل",
       description: "Grilled chicken with your choice of sauce (mushroom sauce or pepper sauce). Served with 2 side dishes.", descriptionAr: "تشيكن جريل مع اختيارك من الصوص (مشروم صوص أو صوص الفلفل). يقدم مع 2 أطباق جانبية",
-      price: 334, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG, recommended: true,
+      price: 334, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG, recommended: true,
     },
     "chicken-lemon": {
       name: "Chicken Lemon", nameAr: "تشيكن ليمون",
       description: "Grilled chicken, lemon sauce, Parmesan. Served with 2 side dishes.", descriptionAr: "فراخ جريل - صوص ليمون - بارميزان. يقدم مع 2 أطباق جانبية",
-      price: 341, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 341, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
       ingredients: ["grilled chicken", "lemon sauce", "Parmesan"],
       ingredientsAr: ["فراخ جريل", "صوص ليمون", "بارميزان"],
     },
     "cordon-bleu-main": {
       name: "Cordon Bleu", nameAr: "كوردن بلو",
       description: "Chicken breasts, smoked beef mix, mozzarella, cheese sauce. Served with 2 side dishes.", descriptionAr: "صدور فراخ - مكس سموك بيف - موتزريلا - صوص جبنة. يقدم مع 2 أطباق جانبية",
-      price: 357, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 357, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
       ingredients: ["chicken breasts", "smoked beef mix", "mozzarella", "cheese sauce"],
       ingredientsAr: ["صدور فراخ", "مكس سموك بيف", "موتزريلا", "صوص جبنة"],
     },
     "country-fried-chicken": {
       name: "Country Fried Chicken", nameAr: "كانتري فرايد تشيكن",
       description: "Fried breasts, pepperoni, mozzarella. Served with 2 side dishes.", descriptionAr: "صدور فرايد - بيروني - موتزريلا. يقدم مع 2 أطباق جانبية",
-      price: 363, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 363, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
       ingredients: ["fried chicken breasts", "pepperoni", "mozzarella"],
       ingredientsAr: ["صدور فرايد", "بيروني", "موتزريلا"],
     },
     "chicken-pesto": {
       name: "Chicken Pesto", nameAr: "تشيكن بيستو",
       description: "Chicken breasts with basil sauce, nuts. Served with 2 side dishes.", descriptionAr: "صدور فراخ مع صوص الريحان - المكسرات. يقدم مع 2 أطباق جانبية",
-      price: 347, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 347, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
       ingredients: ["chicken breasts", "basil sauce", "nuts"],
       ingredientsAr: ["صدور فراخ", "صوص الريحان", "المكسرات"],
     },
     "chicken-fromage": {
       name: "Chicken Fromage", nameAr: "تشيكن فورماج",
       description: "Grilled chicken breasts, caramelized onions, mixed cheese, mozzarella, colored pepper. Served with 2 side dishes.", descriptionAr: "صدور فراخ مشويه - بصل مكرمل - مكس جبن - موتزريلا - فلفل الوان. يقدم مع 2 أطباق جانبية",
-      price: 368, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG, recommended: true,
+      price: 368, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG, recommended: true,
       ingredients: ["grilled chicken breasts", "caramelized onions", "mixed cheese", "mozzarella", "colored pepper"],
       ingredientsAr: ["صدور فراخ مشويه", "بصل مكرمل", "مكس جبن", "موتزريلا", "فلفل الوان"],
     },
     "chicken-gravy": {
       name: "Chicken Gravy", nameAr: "تشيكن جريفي",
       description: "Grilled chicken, colored peppers, onions, mushrooms, brown sauce. Served with 2 side dishes.", descriptionAr: "فراخ جريل مانسيه - فلفل الوان - بصل - مشروم - براون صوص. يقدم مع 2 أطباق جانبية",
-      price: 374, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 374, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
       ingredients: ["grilled chicken", "colored peppers", "onions", "mushrooms", "brown sauce"],
       ingredientsAr: ["فراخ جريل مانسيه", "فلفل الوان", "بصل", "مشروم", "براون صوص"],
     },
     "fajita-main": {
       name: "Fajita", nameAr: "فاهيتا",
       description: "Chicken fajita. Served with 2 side dishes.", descriptionAr: "فاهيتا تشيكن. يقدم مع 2 أطباق جانبية",
-      price: 335, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 335, category: "chicken_main", categoryAr: "أطباق الفراخ الرئيسية", available: true, image: IMG,
     },
-    // Meat
+  },
+
+  // ─── BEEF MAIN DISHES ─────────────────────────────────────────────────────
+  "main_dishes": {
     "grilled-fillet": {
       name: "Grilled Fillet", nameAr: "جريل فيليه",
       description: "Grilled fillet with your choice of sauce (mushroom or pepper sauce). Served with 2 side dishes.", descriptionAr: "جريل فيليه مع اختيارك من الصوص (مشروم صوص أو صوص الفلفل). يقدم مع 2 أطباق جانبية",
-      price: 426, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG, recommended: true,
+      price: 426, category: "main_dishes", categoryAr: "أطباق اللحم الرئيسية", available: true, image: IMG, recommended: true,
     },
     "beef-stroganoff-main": {
       name: "Beef Stroganoff", nameAr: "بيف سترجانوف",
       description: "Emansieh meat, colored peppers, onions, mushrooms, brown sauce. Served with 2 side dishes.", descriptionAr: "لحمه امانسيه - فلفل الوان - بصل - مشروم - براون صوص. يقدم مع 2 أطباق جانبية",
-      price: 439, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 439, category: "main_dishes", categoryAr: "أطباق اللحم الرئيسية", available: true, image: IMG,
       ingredients: ["Emansieh meat", "colored peppers", "onions", "mushrooms", "brown sauce"],
       ingredientsAr: ["لحمه امانسيه", "فلفل الوان", "بصل", "مشروم", "براون صوص"],
     },
     "beef-fajitas-main": {
       name: "Beef Fajitas", nameAr: "فاهيتا لحمه",
       description: "Onions, colored peppers, meat. Served with 2 side dishes.", descriptionAr: "بصل - فلفل الوان - لحمة. يقدم مع 2 أطباق جانبية",
-      price: 429, category: "main_dishes", categoryAr: "أطباق رئيسية", available: true, image: IMG,
+      price: 429, category: "main_dishes", categoryAr: "أطباق اللحم الرئيسية", available: true, image: IMG,
       ingredients: ["onions", "colored peppers", "meat"],
       ingredientsAr: ["بصل", "فلفل الوان", "لحمة"],
     },
