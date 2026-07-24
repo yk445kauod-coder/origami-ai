@@ -31,6 +31,7 @@
 }
 
 :root {
+  color-scheme: light; /* always force light mode — ignore system/browser dark preference */
   /* ── Azura Palette (Original) ── */
   --background: 38 40% 93%;        /* warm parchment */
   --foreground: 22 55% 12%;        /* near-black espresso */
@@ -479,25 +480,7 @@
 }
 .ios-modal-out { animation: iOSModalOut 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
 
-/* iOS Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 16%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --primary: 35 60% 75%;          /* high-contrast bright warm gold/amber */
-    --secondary: 35 30% 85%;        /* light warm cream */
-  }
-  
-  .glass {
-    background: rgba(28,28,30,0.80);
-  }
-}
+/* Dark mode intentionally disabled — Azura always renders in light/warm mode */
 
 
 /* Hide scrollbar */
@@ -566,10 +549,4 @@
   will-change: transform;
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass-premium {
-    background: rgba(20, 24, 40, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12) !important;
-  }
-}
+/* glass-premium dark variant removed — always light mode */
