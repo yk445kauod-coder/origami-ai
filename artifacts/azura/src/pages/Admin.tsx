@@ -531,7 +531,6 @@ const OverviewTab = ({ tr, users, unreadChats, newReviewsCount, logs, menuCount,
 
 const MenuTab = ({ tr, lang, menu, MENU_CATEGORIES, CAT_META }: { tr: any, lang: string, menu: MenuItem[], MENU_CATEGORIES: string[], CAT_META: any }) => {
   const [menuSearch, setMenuSearch] = useState("");
-  const [debouncedMenuSearch, setDebouncedMenuSearch] = useState("");
   const [menuCategoryFilter, setMenuCategoryFilter] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState({ name: "", nameAr: "", price: "", category: "coffee", image: "", description: "", descriptionAr: "", ingredients: "", ingredientsAr: "", available: true, recommended: false });
@@ -576,14 +575,19 @@ const MenuTab = ({ tr, lang, menu, MENU_CATEGORIES, CAT_META }: { tr: any, lang:
     swalSuccess(tr("Banner saved!", "تم حفظ غلاف القسم!"));
   };
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedMenuSearch(menuSearch), 200);
-    return () => clearTimeout(t);
-  }, [menuSearch]);
+  const normalizeSearch = (s: string) =>
+    s.toLowerCase()
+      .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+      .replace(/[\u064B-\u065F]/g, "").trim();
 
   const groupedMenu = useMemo(() => {
+    const q = normalizeSearch(menuSearch);
     const filtered = menu.filter(item => {
-      const matchesSearch = !debouncedMenuSearch || item.name?.toLowerCase().includes(debouncedMenuSearch.toLowerCase()) || item.nameAr?.includes(debouncedMenuSearch);
+      const matchesSearch = !q ||
+        normalizeSearch(item.name || "").includes(q) ||
+        normalizeSearch(item.nameAr || "").includes(q) ||
+        normalizeSearch(item.description || "").includes(q) ||
+        normalizeSearch(item.category || "").includes(q);
       const matchesCategory = menuCategoryFilter === "all" || item.category === menuCategoryFilter;
       return matchesSearch && matchesCategory;
     });
@@ -597,7 +601,7 @@ const MenuTab = ({ tr, lang, menu, MENU_CATEGORIES, CAT_META }: { tr: any, lang:
       groups[cat].push(item);
     });
     return groups;
-  }, [menu, debouncedMenuSearch, menuCategoryFilter]);
+  }, [menu, menuSearch, menuCategoryFilter]);
   const inp = "input-field px-3 py-2.5 text-sm";
   const lbl = "text-[10px] font-bold uppercase mb-1 block text-muted-foreground";
   return (
@@ -811,19 +815,21 @@ const FeaturesTab = ({ tr, featureFlags, toggleFeatureFlag, savingFlag }: { tr: 
 
 const UsersTab = ({ tr, users, deleteUser, formatDuration }: { tr: any, users: any[], deleteUser: any, formatDuration: any }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "returning" | "active" | "issues">("all");
   const [expandedUid, setExpandedUid] = useState<string | null>(null);
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearchTerm(searchTerm), 200);
-    return () => clearTimeout(t);
-  }, [searchTerm]);
+  const normalizeQ = (s: string) =>
+    s.toLowerCase()
+      .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+      .replace(/[\u064B-\u065F]/g, "").trim();
 
   const filteredUsers = useMemo(() => {
+    const q = normalizeQ(searchTerm);
     return users.filter(u => {
-      const nameMatch = (u.name || "Guest").toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                        (u.uid || "").toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const nameMatch = !q ||
+        normalizeQ(u.name || "Guest").includes(q) ||
+        (u.uid || "").toLowerCase().includes(q) ||
+        normalizeQ(u.email || "").includes(q);
       if (!nameMatch) return false;
 
       if (filterMode === "returning") return (u.loginCount || 1) >= 2;
@@ -835,7 +841,7 @@ const UsersTab = ({ tr, users, deleteUser, formatDuration }: { tr: any, users: a
 
       return true;
     });
-  }, [users, debouncedSearchTerm, filterMode]);
+  }, [users, searchTerm, filterMode]);
 
   const totalCount = users.length;
   const highValueCount = users.filter(u => (u.loginCount || 1) >= 3 || (u.activityScore || 0) >= 100).length;

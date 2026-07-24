@@ -1137,7 +1137,7 @@ export default function MenuLightweight() {
                 );
               })()}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div key={`grid-${cat}`} className="grid grid-cols-2 gap-4">
                 {paginated.map((item, idx) => (
                   <MenuItemCard
                     key={item.id}
