@@ -61,12 +61,16 @@ export async function chatWithPollinations(
   history: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string
 ): Promise<string> {
-  const formattedHistory = history.map((h) => ({
+  // Keep only last 4 turns and cap each message to avoid URL/body bloat
+  const trimmedHistory = history.slice(-4).map((h) => ({
     role: h.role === 'model' ? 'assistant' : 'user',
-    content: h.parts[0]?.text || "",
+    content: (h.parts[0]?.text || "").slice(0, 300),
   }));
 
-  // First try the official OpenAI-compatible POST endpoint
+  // Trim system prompt to 800 chars for Pollinations (it ignores the rest anyway)
+  const trimmedSystem = systemPrompt.slice(0, 800);
+
+  // Try the official OpenAI-compatible POST endpoint first (no API key needed)
   const url = "https://text.pollinations.ai/openai/chat/completions";
 
   try {
@@ -75,12 +79,14 @@ export async function chatWithPollinations(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         messages: [
-          { role: "system", content: systemPrompt },
-          ...formattedHistory,
-          { role: "user", content: message }
+          { role: "system", content: trimmedSystem },
+          ...trimmedHistory,
+          { role: "user", content: message.slice(0, 500) }
         ],
         model: "openai",
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 280,
+        private: true, // suppress public feed logging
       }),
     });
 
@@ -90,23 +96,24 @@ export async function chatWithPollinations(
       if (content) return content;
     }
   } catch (err) {
-    console.warn("Pollinations POST endpoint failed, trying GET fallback:", err);
+    console.warn("Pollinations POST failed, trying GET fallback:", err);
   }
 
-  // Fallback to GET endpoint which is robust and bypasses Cloudflare 502 Bad Gateway
+  // GET fallback — keep URL short by limiting history to last 2 turns
   try {
-    const historyText = history.map((h) => `${h.role === 'model' ? 'Assistant' : 'User'}: ${h.parts[0]?.text || ""}`).join("\n");
-    const fullPrompt = historyText ? `${historyText}\nUser: ${message}` : message;
+    const historyText = history.slice(-2).map(
+      (h) => `${h.role === 'model' ? 'Assistant' : 'User'}: ${(h.parts[0]?.text || "").slice(0, 150)}`
+    ).join("\n");
+    const fullPrompt = historyText ? `${historyText}\nUser: ${message.slice(0, 300)}` : message.slice(0, 300);
 
-    // Append model=openai to utilize the full free reasoning model on pollinations.ai
-    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?system=${encodeURIComponent(systemPrompt)}&model=openai`;
+    const getUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?system=${encodeURIComponent(trimmedSystem.slice(0, 400))}&model=openai&private=true`;
 
     const res = await fetch(getUrl);
     if (res.ok) {
       const text = await res.text();
       if (text) return text;
     }
-    throw new Error(`GET request failed with status: ${res.status}`);
+    throw new Error(`Pollinations GET failed with status: ${res.status}`);
   } catch (err) {
     console.error("Pollinations GET fallback failed:", err);
     throw err;
@@ -183,14 +190,15 @@ export async function chatWithAI(
         model: "llama-3.1-8b-instant", // High-rate-limit free model with good Arabic & English support
         messages: [
           { role: "system", content: systemPrompt },
-          ...history.map((h) => ({
+          // Keep only the last 6 history turns to stay well within free-tier token limits
+          ...history.slice(-6).map((h) => ({
             role: h.role === 'model' ? 'assistant' : 'user',
-            content: h.parts[0]?.text || "",
+            content: (h.parts[0]?.text || "").slice(0, 400), // cap each history message
           })),
-          { role: "user", content: message }
+          { role: "user", content: message.slice(0, 500) }
         ],
-        temperature: 0.85,
-        max_tokens: 700,
+        temperature: 0.75,
+        max_tokens: 300, // keep responses concise; avoids exceeding free-tier per-request limit
       }),
     });
 

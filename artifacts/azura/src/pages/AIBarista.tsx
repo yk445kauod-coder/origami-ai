@@ -281,13 +281,15 @@ export default function AIBarista() {
         return acc;
       }, {} as Record<string, MenuItem[]>);
     
+    // Keep menu context lean: only ID, name and price — no descriptions/ingredients.
+    // This is the single biggest driver of token usage; details are served on demand.
     const menuCtx = Object.entries(byCategory)
       .map(([cat, items]) => `=== ${cat.toUpperCase()} ===\n` + 
         items.map((i) => {
-          const details = lang === "ar"
-            ? `${i.nameAr || i.name}${i.descriptionAr ? `: ${i.descriptionAr}` : ""}${i.ingredientsAr ? ` (المكونات: ${i.ingredientsAr})` : ""} - السعر: ${i.price} ج.م`
-            : `${i.name}${i.description ? `: ${i.description}` : ""}${i.ingredients ? ` (Ingredients: ${i.ingredients})` : ""} - Price: ${i.price} EGP`;
-          return `• [ID: ${i.id}] ${details}`;
+          const label = lang === "ar"
+            ? `${i.nameAr || i.name} - ${i.price} ج.م`
+            : `${i.name} - ${i.price} EGP`;
+          return `• [ID: ${i.id}] ${label}`;
         })
         .join("\n"))
       .join("\n");

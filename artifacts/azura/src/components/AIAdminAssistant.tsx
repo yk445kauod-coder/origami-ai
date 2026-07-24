@@ -389,9 +389,9 @@ Always prioritize ROI and customer lifetime value (LTV).`;
       if (apiKey) {
         const systemPrompt = buildSystemPrompt();
 
-        const history = messages.slice(-10).map(m => ({
+        const history = messages.slice(-6).map(m => ({
           role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }]
+          parts: [{ text: m.content.slice(0, 400) }]
         }));
 
         response = await chatWithAI(apiKey, userMessage.content, history, systemPrompt);
