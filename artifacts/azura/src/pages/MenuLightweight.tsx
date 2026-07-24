@@ -953,6 +953,7 @@ export default function MenuLightweight() {
                 key={c.id}
                 onClick={() => {
                   setCat(c.id);
+                  setPage(1); // Reset page synchronously with category change to prevent stale items
                   if (search) setSearch(""); // Clear search when switching sections manually
                   if (user?.uid) {
                     logUserActivity(user.uid, "click_category", { category: c.id }, 5);
