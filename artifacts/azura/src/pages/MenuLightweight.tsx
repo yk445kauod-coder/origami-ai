@@ -91,7 +91,7 @@ const CATS = [
   { id: "burgers",         emoji: "🍔",  en: "Beef Burgers",             ar: "برجر لحم"            },
   { id: "smash_burgers",   emoji: "🔥",  en: "Smash Burgers",            ar: "سماش برجر"           },
   { id: "fried_chicken",   emoji: "🍗",  en: "Fried Chicken Sandwiches", ar: "ساندوتشات الفراخ"     },
-  { id: "add_ons",         emoji: "➕",  en: "Extra Kitchen",             ar: "إضافات مطبخ"         },
+  { id: "add_ons",         emoji: "➕",  en: "Extra Kitchen",             ar: "اضافات"              },
   // --- Barista ---
   { id: "hot_drinks",      emoji: "☕",  en: "Hot Drinks",               ar: "مشروبات ساخنة"       },
   { id: "coffee",          emoji: "☕",  en: "Espresso (S)",             ar: "إسبريسو"             },
@@ -527,7 +527,10 @@ function ItemModal({ item, onClose, lang }: { item: MenuItem; onClose: () => voi
             </div>
 
             {/* Info Footer */}
-            <div className="flex flex-col gap-4 pt-6 mt-2 border-t border-border/40">
+            <div
+              className="flex flex-col gap-4 pt-6 mt-2 border-t border-border/40"
+              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}
+            >
               <button
                 onClick={onClose}
                 className="btn-primary w-full py-4 rounded-2xl text-sm font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
@@ -570,6 +573,9 @@ export default function MenuLightweight() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  // Tracks whether we pushed a modal history entry so the back button closes
+  // the modal instead of leaving the app entirely.
+  const modalHistoryPushed = useRef(false);
 
   const tr = useCallback((en: string, ar: string) => lang === "ar" ? ar : en, [lang]);
 
@@ -578,8 +584,39 @@ export default function MenuLightweight() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  // Close modal — pops the synthetic history entry we pushed on open so the
+  // browser back button stays in sync.
+  // IMPORTANT: do NOT flip modalHistoryPushed here; let popstate do it so
+  // the guard inside the popstate handler still passes when history.back() fires.
+  const closeModal = useCallback(() => {
+    if (modalHistoryPushed.current) {
+      window.history.back(); // triggers popstate → ref cleared + setSelectedItem(null)
+    } else {
+      setSelectedItem(null);
+    }
+  }, []);
+
+  // Intercept the hardware/browser back button while the modal is open.
+  // This is also the single place that clears the ref and closes the modal,
+  // whether back was triggered by the close button or by the device's back key.
+  useEffect(() => {
+    const handlePopState = () => {
+      if (modalHistoryPushed.current) {
+        modalHistoryPushed.current = false;
+        setSelectedItem(null);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const handleSelectItem = useCallback((item: MenuItem | null) => {
     setSelectedItem(item);
+    if (item) {
+      // Push a synthetic history entry so the back button closes this modal.
+      window.history.pushState({ azuraModal: true }, "");
+      modalHistoryPushed.current = true;
+    }
     if (user?.uid && item) {
       logUserActivity(user.uid, "view_item", {
         itemId: item.id,
@@ -1249,7 +1286,7 @@ export default function MenuLightweight() {
       {selectedItem && (
         <ItemModal 
           item={selectedItem} 
-          onClose={() => setSelectedItem(null)} 
+          onClose={closeModal} 
           lang={lang}
         />
       )}
